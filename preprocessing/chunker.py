@@ -1,14 +1,15 @@
 import uuid
+import re
 from typing import List, Dict
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-import re
 
 
 class SemanticChunker:
     """
-    Section-agnostic semantic chunker for academic documents.
+    Section-agnostic, evidence-centric semantic chunker for academic documents.
+    Designed for RAG with hallucination control.
     """
 
     def __init__(
@@ -18,78 +19,85 @@ class SemanticChunker:
         min_tokens: int = 200,
         overlap_tokens: int = 50,
         similarity_threshold: float = 0.75,
+        window_size: int = 3,
     ):
         self.model = SentenceTransformer(model_name)
         self.max_tokens = max_tokens
         self.min_tokens = min_tokens
         self.overlap_tokens = overlap_tokens
         self.similarity_threshold = similarity_threshold
+        self.window_size = window_size
 
-    # -------------------------
+    # --------------------------------------------------
     # Public API
-    # -------------------------
+    # --------------------------------------------------
     def chunk(self, pages: List[Dict], doc_id: str) -> List[Dict]:
         sentences, sentence_pages = self._split_into_sentences(pages)
 
+        # Embed + normalize sentences
         embeddings = self.model.encode(sentences, convert_to_numpy=True)
+        embeddings = self._normalize_embeddings(embeddings)
 
         chunks = []
-        current_chunk = []
+
+        current_sentences = []
         current_embeddings = []
-        current_token_count = 0
+        current_tokens = 0
 
         for i, sentence in enumerate(sentences):
             sentence_tokens = self._estimate_tokens(sentence)
+            sentence_embedding = embeddings[i]
 
-            if current_chunk:
-                sim = cosine_similarity(
-                    [embeddings[i]], [np.mean(current_embeddings, axis=0)]
-                )[0][0]
-            else:
-                sim = 1.0
+            similarity = self._compute_similarity(
+                sentence_embedding, current_embeddings
+            )
 
-            if (
-                current_token_count + sentence_tokens > self.max_tokens
-                or (sim < self.similarity_threshold and current_token_count >= self.min_tokens)
-            ):
+            should_split = (
+                current_tokens + sentence_tokens > self.max_tokens
+                or (
+                    similarity < self.similarity_threshold
+                    and current_tokens >= self.min_tokens
+                )
+            )
+
+            if should_split and current_sentences:
                 chunks.append(
                     self._build_chunk(
-                        current_chunk,
+                        current_sentences,
                         doc_id,
                         sentence_pages,
-                        start_idx=i - len(current_chunk),
+                        start_idx=i - len(current_sentences),
                         end_idx=i - 1,
                     )
                 )
 
-                # overlap handling
-                overlap = self._get_overlap(current_chunk)
-                current_chunk = overlap
-                current_embeddings = current_embeddings[-len(overlap):]
-                current_token_count = sum(
-                    self._estimate_tokens(s) for s in overlap
+                # overlap
+                current_sentences = self._get_overlap(current_sentences)
+                current_embeddings = current_embeddings[-len(current_sentences):]
+                current_tokens = sum(
+                    self._estimate_tokens(s) for s in current_sentences
                 )
 
-            current_chunk.append(sentence)
-            current_embeddings.append(embeddings[i])
-            current_token_count += sentence_tokens
+            current_sentences.append(sentence)
+            current_embeddings.append(sentence_embedding)
+            current_tokens += sentence_tokens
 
-        if current_chunk:
+        if current_sentences:
             chunks.append(
                 self._build_chunk(
-                    current_chunk,
+                    current_sentences,
                     doc_id,
                     sentence_pages,
-                    start_idx=len(sentences) - len(current_chunk),
+                    start_idx=len(sentences) - len(current_sentences),
                     end_idx=len(sentences) - 1,
                 )
             )
 
         return chunks
 
-    # -------------------------
+    # --------------------------------------------------
     # Internal helpers
-    # -------------------------
+    # --------------------------------------------------
     def _split_into_sentences(self, pages: List[Dict]):
         sentences = []
         sentence_pages = []
@@ -98,25 +106,51 @@ class SemanticChunker:
             page_num = page["page_num"]
             text = page["text"]
 
-            page_sentences = re.split(r"(?<=[.!?])\s+", text)
-            for s in page_sentences:
+            # Conservative academic sentence splitting
+            parts = re.split(
+                r"(?<!et al)(?<!Fig)(?<!Eq)(?<!Dr)(?<!Mr)(?<!Ms)(?<=[.!?])\s+",
+                text,
+            )
+
+            for s in parts:
                 s = s.strip()
-                if s:
+                if len(s) > 20:  # ignore junk fragments
                     sentences.append(s)
                     sentence_pages.append(page_num)
 
         return sentences, sentence_pages
 
     def _estimate_tokens(self, text: str) -> int:
-        return max(1, len(text.split()))
+        # lightweight, consistent approximation
+        return max(1, int(len(text) / 4))
 
-    def _get_overlap(self, chunk_sentences: List[str]) -> List[str]:
+    def _normalize_embeddings(self, embeddings: np.ndarray) -> np.ndarray:
+        norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+        return embeddings / np.clip(norms, 1e-10, None)
+
+    def _compute_similarity(
+        self,
+        sentence_embedding: np.ndarray,
+        current_embeddings: List[np.ndarray],
+    ) -> float:
+        if not current_embeddings:
+            return 1.0
+
+        # use recent window to reduce centroid drift
+        window = current_embeddings[-self.window_size :]
+        centroid = np.mean(window, axis=0, keepdims=True)
+
+        return cosine_similarity(
+            sentence_embedding.reshape(1, -1), centroid
+        )[0][0]
+
+    def _get_overlap(self, sentences: List[str]) -> List[str]:
         tokens = 0
         overlap = []
 
-        for sentence in reversed(chunk_sentences):
-            tokens += self._estimate_tokens(sentence)
-            overlap.insert(0, sentence)
+        for s in reversed(sentences):
+            tokens += self._estimate_tokens(s)
+            overlap.insert(0, s)
             if tokens >= self.overlap_tokens:
                 break
 
