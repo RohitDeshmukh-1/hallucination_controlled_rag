@@ -1,38 +1,21 @@
-
-# Core Python & Utilities
 numpy>=1.24
 scipy>=1.11
 pandas>=2.0
-tqdm>=4.66
-pyyaml>=6.0
+
 python-dotenv>=1.0
 
-# PDF Ingestion & Text Processing
-PyMuPDF>=1.23.0          # PDF loading (fitz)
-pdfplumber>=0.11.0       # fallback / layout sanity checks
+PyMuPDF>=1.23.0
+pdfplumber>=0.11.0
 regex>=2023.10.0
 
-# Embeddings & Transformers
 torch>=2.0
-transformers>=4.36
+transformers>=4.38
 sentence-transformers>=2.2.2
 
-# Vector Search (Retrieval)
-faiss-cpu>=1.7.4         # use faiss-gpu ONLY if you really need it
+faiss-cpu>=1.7.4
 
-# Reranking & NLI (Hallucination Control)
-scikit-learn>=1.3
-datasets>=2.15
-evaluate>=0.4.1
+openai>=1.12.0
 
-# API / Serving (Optional but planned)
 fastapi>=0.110
 uvicorn>=0.29
 pydantic>=2.5
-
-# Experiment Tracking & Debugging
-loguru>=0.7
-rich>=13.7
-
-# Testing
-pytest>=7.4
