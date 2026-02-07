@@ -2,70 +2,38 @@ import re
 from typing import List, Dict
 
 
-class TextCleaner:
+def clean_pages(pages: List[Dict]) -> List[Dict]:
     """
-    Conservative, production-grade cleaner for academic documents.
+    Clean extracted PDF pages while preserving scientific content.
 
-    Design principles:
-    - Remove metadata and boilerplate noise
-    - Preserve scientific claims and numerical evidence
-    - Section-agnostic
-    - Deterministic and explainable
+    Parameters
+    ----------
+    pages : List[Dict]
+        Page dictionaries with keys: 'page_num', 'text'
+
+    Returns
+    -------
+    List[Dict]
+        Cleaned pages with same structure.
     """
 
-    def __init__(self):
-        self.email_pattern = re.compile(
-            r"\b[\w\.-]+@[\w\.-]+\.\w+\b"
-        )
+    cleaned = []
 
-        self.inline_citation_patterns = [
-            re.compile(r"\[\d+(?:,\s*\d+)*\]"),                 # [1], [1, 2]
-            re.compile(r"\([A-Z][a-z]+ et al\.,?\s*\d{4}\)"),   # (Smith et al., 2019)
-            re.compile(r"\(\d{4}\)"),                           # (2017)
-        ]
+    for page in pages:
+        text = page["text"]
 
-        self.footer_patterns = [
-            re.compile(r"Proceedings of .*", re.IGNORECASE),
-            re.compile(r"arXiv:\d+\.\d+v\d+", re.IGNORECASE),
-            re.compile(r"\bNeurIPS\b|\bNIPS\b|\bICML\b|\bICLR\b", re.IGNORECASE),
-        ]
+        # Remove excessive whitespace
+        text = re.sub(r"\s+", " ", text)
 
-        self.multispace_pattern = re.compile(r"\s+")
+        # Remove common boilerplate patterns
+        text = re.sub(r"arXiv:\d+\.\d+(v\d+)?", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"©.*?All rights reserved\.", "", text, flags=re.IGNORECASE)
 
-    # --------------------------------------------------
-    # Public API
-    # --------------------------------------------------
-    def clean_pages(self, pages: List[Dict]) -> List[Dict]:
-        """
-        Clean page-wise text while preserving provenance.
-        """
-        return [
+        cleaned.append(
             {
                 "page_num": page["page_num"],
-                "text": self._clean_text(page["text"]),
+                "text": text.strip(),
             }
-            for page in pages
-        ]
+        )
 
-    # --------------------------------------------------
-    # Internal helpers
-    # --------------------------------------------------
-    def _clean_text(self, text: str) -> str:
-        # Remove email addresses
-        text = self.email_pattern.sub("", text)
-
-        # Remove inline citation markers
-        for pattern in self.inline_citation_patterns:
-            text = pattern.sub("", text)
-
-        # Remove conference / archive footers
-        for pattern in self.footer_patterns:
-            text = pattern.sub("", text)
-
-        # Normalize repeated punctuation
-        text = re.sub(r"\.{2,}", ".", text)
-
-        # Normalize whitespace
-        text = self.multispace_pattern.sub(" ", text)
-
-        return text.strip()
+    return cleaned
