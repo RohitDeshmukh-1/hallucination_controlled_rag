@@ -1,21 +1,29 @@
+# Core numerical & utilities
 numpy>=1.24
 scipy>=1.11
 pandas>=2.0
-
-python-dotenv>=1.0
-
-PyMuPDF>=1.23.0
-pdfplumber>=0.11.0
 regex>=2023.10.0
 
-torch>=2.0
-transformers>=4.38
-sentence-transformers>=2.2.2
+# PDF ingestion
+PyMuPDF>=1.23.0
+pdfplumber>=0.11.0
 
+# Embeddings & retrieval
+torch>=2.0
+sentence-transformers>=2.2.2
+transformers>=4.38
 faiss-cpu>=1.7.4
 
+# LLM + environment
 openai>=1.12.0
+python-dotenv>=1.0
 
+# Backend (FastAPI)
 fastapi>=0.110
 uvicorn>=0.29
+python-multipart>=0.0.9
 pydantic>=2.5
+
+# Frontend (Streamlit UI)
+streamlit>=1.32
+requests>=2.31
