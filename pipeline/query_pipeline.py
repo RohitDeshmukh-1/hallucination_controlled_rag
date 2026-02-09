@@ -20,7 +20,7 @@ def run_query_pipeline(question: str):
         }
 
     query_embedding = encoder.embed_query(question)
-    retrieved = index.search(query_embedding, top_k=12)
+    retrieved = index.search(query_embedding, top_k=20)
 
     if not retrieved:
         return {
@@ -30,7 +30,7 @@ def run_query_pipeline(question: str):
         }
 
     reranker = CrossEncoderReranker()
-    evidence = reranker.rerank(question, retrieved, top_n=5)
+    evidence = reranker.rerank(question, retrieved, top_n=8)
 
     if not evidence:
         return {
