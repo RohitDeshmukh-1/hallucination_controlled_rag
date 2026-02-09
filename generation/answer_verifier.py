@@ -19,7 +19,7 @@ class AnswerVerifier:
     def __init__(
         self,
         model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
-        similarity_threshold: float = 0.75,
+        similarity_threshold: float = 0.65,
     ):
         self.model = SentenceTransformer(model_name)
         self.similarity_threshold = similarity_threshold
