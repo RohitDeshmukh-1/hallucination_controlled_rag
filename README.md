@@ -1,60 +1,73 @@
 # Hallucination-Controlled Academic RAG
 
-**A faithful, citation-rigorous, and abstention-aware Retrieval-Augmented Generation framework for academic / scientific question answering**
+**A production-ready, citation-verified, hallucination-controlled RAG system for academic and scientific question answering.**
 
-## 📄 Overview
+---
 
-Despite impressive generative capabilities, **Large Language Models (LLMs)** frequently hallucinate — especially on knowledge-intensive academic and scientific questions.
+## 🏠 Overview
 
-While **Retrieval-Augmented Generation (RAG)** greatly improves factual grounding by conditioning generation on retrieved documents, conventional RAG pipelines still allow:
+Large Language Models (LLMs) frequently hallucinate, especially on knowledge-intensive academic questions. While RAG improves grounding, conventional pipelines still allow:
 
-- unsupported claims when retrieved context is weak/ambiguous
-- implicit reasoning beyond provided evidence
-- loose or post-hoc citation behavior
-- overconfident answering even when evidence is clearly insufficient
+- ❌ Unsupported claims when context is weak
+- ❌ Implicit reasoning beyond evidence  
+- ❌ Loose or missing citations
+- ❌ Overconfident answers with insufficient evidence
 
-**Hallucination-Controlled Academic RAG** introduces a stricter, more principled approach optimized for high-stakes academic & scientific domains.
+**This system** takes a stricter approach optimized for high-stakes academic domains:
 
-### Core Design Principles
+| Feature | Description |
+|---------|-------------|
+| 📍 **Inline Citations** | Every factual claim includes `[E1]`, `[E2]` references to exact pages |
+| 🔒 **Evidence-Only Generation** | Answers use *only* retrieved content, no world knowledge |
+| 🚫 **Principled Abstention** | System refuses to answer when evidence is insufficient |
+| 📊 **Confidence Scoring** | Quantified support ratio and citation coverage metrics |
+| ✅ **Post-Generation Verification** | Sentence-level semantic similarity checking |
 
-1. **Page-level mandatory citations**  
-   Every factual statement must be explicitly tied to one or more exact page references from retrieved documents.
-
-2. **Evidence-only generation**  
-   The model is constrained to generate answers **exclusively** from retrieved & re-ranked evidence (no free-form world knowledge injection).
-
-3. **Principled abstention**  
-   When retrieved evidence is insufficient, ambiguous, or does not allow a high-confidence answer → the system **explicitly refuses to answer** instead of hallucinating or guessing.
-
-The central goal shifts from **maximizing answer completeness** → **maximizing verifiable faithfulness**.
+---
 
 ## ✨ Key Features
 
-- Dense retrieval + cross-encoder re-ranking pipeline
-- Strict page-level citation enforcement during generation
-- Controlled decoding strategies that prevent unsupported claims
-- Automatic abstention detection & generation of refusal responses
-- Designed & evaluated primarily on academic/scientific QA datasets
-- Modular architecture (easy to swap retriever, reranker, LLM backend)
+- **Dense Retrieval + Cross-Encoder Reranking**: Two-stage retrieval for high precision
+- **Citation Extraction & Mapping**: Automatic extraction of `[E1]`, `[E2]` citations with page references
+- **Confidence Metrics**: Evidence support score, citation coverage, and verification verdicts
+- **Three Verdict Levels**: `supported`, `partially_supported`, `refused`
+- **Production-Ready UI**: Professional Streamlit interface with real-time status
+- **Modular Architecture**: Easily swap LLM providers, embeddings, or retrievers
 
-## Project Status (early 2026)
+---
 
-- Working prototype implementation
-- Preliminary experiments on scientific QA benchmarks
-- Focus on faithfulness & citation quality over ROUGE/BLEU-style overlap
+## 📐 Architecture
 
-## Installation
+<h3 align="center">Hallucination-Controlled Academic RAG System Architecture</h3>
+
+<p align="center">
+  <img src="assets/rag_architecture.png" width="100%">
+</p>
+
+<p align="center">
+  <em>
+  Figure: Offline index construction and online inference pipeline with retrieval gating, citation-aware generation, faithfulness verification, confidence scoring, and abstention mechanism.
+  </em>
+</p>
+
+---
+
+## 🚀 Quick Start
+
+### Installation
 
 ```bash
-# clone the repository
+# Clone the repository
 git clone https://github.com/yourusername/hallucination-controlled-academic-rag.git
 cd hallucination-controlled-academic-rag
 
-# recommended: use uv / pipx / conda
+# Create virtual environment
 python -m venv .venv
-source .venv/bin/activate
 
-# install dependencies
+# Activate (Linux/Mac)
+source .venv/bin/activate
+# Activate (Windows)
+.venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
-# or with uv (faster)
-uv pip install -r requirements.txt
