@@ -38,17 +38,11 @@ Large Language Models (LLMs) frequently hallucinate, especially on knowledge-int
 
 ## 📐 Architecture
 
-<h3 align="center">Hallucination-Controlled Academic RAG System Architecture</h3>
+### Hallucination-Controlled Academic RAG System Architecture
 
-<p align="center">
-  <img src=r"assets/rag_architecture.png" width="100%">
-</p>
+![Hallucination-Controlled Academic RAG Architecture](./assets/rag_architecture.png)
 
-<p align="center">
-  <em>
-  Figure: Offline index construction and online inference pipeline with retrieval gating, citation-aware generation, faithfulness verification, confidence scoring, and abstention mechanism.
-  </em>
-</p>
+*Figure: Offline index construction and online inference pipeline with retrieval gating, citation-aware generation, faithfulness verification, confidence scoring, and abstention mechanism.*
 
 ---
 
@@ -66,6 +60,7 @@ python -m venv .venv
 
 # Activate (Linux/Mac)
 source .venv/bin/activate
+
 # Activate (Windows)
 .venv\Scripts\activate
 
