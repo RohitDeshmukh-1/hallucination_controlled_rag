@@ -41,7 +41,7 @@ Large Language Models (LLMs) frequently hallucinate, especially on knowledge-int
 <h3 align="center">Hallucination-Controlled Academic RAG System Architecture</h3>
 
 <p align="center">
-  <img src="assets/rag_architecture.png" width="100%">
+  <img src=r"assets/rag_architecture.png" width="100%">
 </p>
 
 <p align="center">
