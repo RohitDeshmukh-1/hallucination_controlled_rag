@@ -18,7 +18,7 @@ class PromptBuilder:
 
     def __init__(
         self,
-        max_evidence_chunks: int = 5,
+        max_evidence_chunks: int = 8,
     ):
         self.max_evidence_chunks = max_evidence_chunks
 
@@ -53,13 +53,14 @@ class PromptBuilder:
             "Question:\n"
             f"{question}\n\n"
             "Instructions:\n"
-            "- Answer using ONLY the evidence above.\n"
-            "- Every factual sentence MUST end with one or more citations "
-            "in the form [E1], [E2], etc.\n"
+            "- Answer using ONLY the evidence above. You may make reasonable "
+            "inferences that follow directly from the evidence.\n"
+            "- Factual claims MUST end with citations in the form [E1], [E2], etc.\n"
             "- Use only citation identifiers that appear in the evidence.\n"
-            "- Do NOT combine multiple claims in one sentence unless all are cited.\n"
-            "- If the evidence is insufficient, respond exactly with:\n"
-            "  \"I cannot answer based on the provided documents.\""
+            "- Connecting phrases and logical transitions do not require citations.\n"
+            "- If the evidence provides partial information, answer what you can "
+            "and note any limitations.\n"
+            "- Only say you cannot answer if the evidence is completely irrelevant."
         )
 
         return {
@@ -72,10 +73,13 @@ class PromptBuilder:
         System-level instruction enforcing strict grounding and citation behavior.
         """
         return (
-            "You are an academic question-answering system.\n"
-            "You must not use prior knowledge or make assumptions.\n"
-            "All answers must be fully grounded in the provided evidence.\n"
-            "If a claim cannot be supported with a citation, it must not be written."
+            "You are an academic question-answering system with strict citation requirements.\n"
+            "CRITICAL RULES:\n"
+            "1. You must cite sources using [E1], [E2], etc. format INLINE after each factual claim.\n"
+            "2. Every sentence containing facts, numbers, names, or findings MUST end with a citation.\n"
+            "3. You may only cite evidence IDs that appear in the provided evidence (E1 through E8 max).\n"
+            "4. Do NOT use prior knowledge - only use information from the evidence.\n"
+            "5. Place citations at the END of each sentence, before the period: '...the result is 0.5 [E1].'"
         )
 
     def _format_evidence(self, chunks: List[Dict]) -> str:

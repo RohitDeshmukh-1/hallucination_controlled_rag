@@ -4,6 +4,7 @@ from retrieval.cross_encoder import CrossEncoderReranker
 from generation.prompt_builder import PromptBuilder
 from generation.llm_client import LLMClient
 from generation.answer_verifier import AnswerVerifier
+from generation.citation_extractor import CitationExtractor
 
 
 def run_query_pipeline(question: str):
@@ -51,24 +52,52 @@ def run_query_pipeline(question: str):
             "citations": [],
         }
 
+    # Extract and map citations from the answer
+    citation_extractor = CitationExtractor()
+    citation_result = citation_extractor.extract_and_map(answer, evidence)
+
     verifier = AnswerVerifier()
     verification = verifier.verify(answer, evidence)
+
+    # Build detailed citations from extraction (only cited evidence)
+    citations = [
+        {
+            "evidence_id": c["evidence_id"],
+            "doc_id": c["doc_id"],
+            "pages": f"{c['page_start']}-{c['page_end']}",
+            "text_preview": c["text_preview"],
+        }
+        for c in citation_result["inline_citations"]
+    ]
 
     if verification["verdict"] == "unsupported":
         return {
             "answer": "I cannot answer based on the provided documents.",
             "verdict": "refused",
             "unsupported_sentences": verification["unsupported_sentences"],
+            "confidence": verification.get("confidence", 0.0),
+            "citation_coverage": 0.0,
+        }
+
+    if verification["verdict"] == "partially_supported":
+        caveat = (
+            "\n\n*Note: Some aspects of this answer may have limited "
+            "direct support in the source documents.*"
+        )
+        return {
+            "answer": answer + caveat,
+            "verdict": "partially_supported",
+            "citations": citations,
+            "confidence": verification.get("confidence", 0.0),
+            "support_ratio": verification.get("support_ratio", 0.0),
+            "citation_coverage": citation_result["citation_coverage"],
+            "uncited_sentences": citation_result["uncited_sentences"],
         }
 
     return {
         "answer": answer,
         "verdict": "supported",
-        "citations": [
-            {
-                "doc_id": c["doc_id"],
-                "pages": f"{c['page_start']}-{c['page_end']}",
-            }
-            for c in evidence
-        ],
+        "citations": citations,
+        "confidence": verification.get("confidence", 1.0),
+        "citation_coverage": citation_result["citation_coverage"],
     }
