@@ -1,8 +1,7 @@
 import uuid
 import re
-from typing import List, Dict
+from typing import List, Dict, Any, Optional
 import numpy as np
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
@@ -14,27 +13,29 @@ class SemanticChunker:
 
     def __init__(
         self,
-        model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
+        encoder_model: Any, 
         max_tokens: int = 450,
         min_tokens: int = 200,
         overlap_tokens: int = 50,
         similarity_threshold: float = 0.75,
         window_size: int = 3,
     ):
-        self.model = SentenceTransformer(model_name)
+        """
+        :param encoder_model: A sentence-transformer model or compatible object with .encode() method.
+        """
+        self.model = encoder_model
         self.max_tokens = max_tokens
         self.min_tokens = min_tokens
         self.overlap_tokens = overlap_tokens
         self.similarity_threshold = similarity_threshold
         self.window_size = window_size
 
-    # --------------------------------------------------
     # Public API
-    # --------------------------------------------------
     def chunk(self, pages: List[Dict], doc_id: str) -> List[Dict]:
         sentences, sentence_pages = self._split_into_sentences(pages)
 
         # Embed + normalize sentences
+        # Use the injected model
         embeddings = self.model.encode(sentences, convert_to_numpy=True)
         embeddings = self._normalize_embeddings(embeddings)
 
@@ -95,9 +96,7 @@ class SemanticChunker:
 
         return chunks
 
-    # --------------------------------------------------
     # Internal helpers
-    # --------------------------------------------------
     def _split_into_sentences(self, pages: List[Dict]):
         sentences = []
         sentence_pages = []

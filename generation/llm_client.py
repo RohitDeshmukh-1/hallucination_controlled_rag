@@ -1,6 +1,8 @@
-import os
-from dotenv import load_dotenv
-from openai import OpenAI
+import logging
+from openai import OpenAI, OpenAIError
+from configs.settings import settings
+
+logger = logging.getLogger(__name__)
 
 
 class LLMClient:
@@ -10,31 +12,17 @@ class LLMClient:
     """
 
     def __init__(self):
-        # Load environment variables once at startup
-        load_dotenv()
-
-        api_key = os.getenv("LLM_API_KEY")
-        api_base = os.getenv("LLM_API_BASE")
-        model = os.getenv("LLM_MODEL")
-
-        if not api_key or not api_base or not model:
-            raise RuntimeError(
-                "Missing LLM configuration. "
-                "Ensure LLM_API_KEY, LLM_API_BASE, and LLM_MODEL are set in .env"
-            )
+        self.api_key = settings.LLM_API_KEY
+        self.base_url = settings.LLM_API_BASE
+        self.model = settings.LLM_MODEL
 
         self.client = OpenAI(
-            api_key=api_key,
-            base_url=api_base,
+            api_key=self.api_key,
+            base_url=self.base_url,
         )
 
-        self.model = model
-
     def generate(self, prompt: dict) -> str:
-        """
-        Generate an answer strictly grounded in the provided prompt.
-        """
-
+        """Generate an answer strictly grounded in the provided prompt."""
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -42,13 +30,15 @@ class LLMClient:
                     {"role": "system", "content": prompt["system"]},
                     {"role": "user", "content": prompt["user"]},
                 ],
-                temperature=0.0,
-                max_tokens=300,
+                temperature=settings.LLM_TEMPERATURE,
+                max_tokens=settings.LLM_MAX_TOKENS,
             )
 
             return response.choices[0].message.content.strip()
 
+        except OpenAIError as e:
+            logger.error("LLM API Error: %s", e)
+            raise
         except Exception as e:
-            # This log is CRITICAL for debugging Groq issues
-            print("LLM ERROR:", repr(e))
+            logger.error("LLM Unexpected Error: %r", e)
             raise

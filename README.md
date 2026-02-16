@@ -33,6 +33,94 @@ Large Language Models (LLMs) frequently hallucinate, especially on knowledge-int
 - **Three Verdict Levels**: `supported`, `partially_supported`, `refused`
 - **Production-Ready UI**: Professional Streamlit interface with real-time status
 - **Modular Architecture**: Easily swap LLM providers, embeddings, or retrievers
+- **Dockerized Deployment**: Includes `Dockerfile` and `docker-compose.yml` for easy setup.
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.10+
+- Docker & Docker Compose (optional)
+- An API Key for an OpenAI-compatible LLM provider (e.g., Groq, OpenAI).
+
+### 1. Installation (Local)
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/yourusername/hallucination-controlled-academic-rag.git
+    cd hallucination-controlled-academic-rag
+    ```
+
+2.  **Create a virtual environment:**
+    ```bash
+    python -m venv .venv
+    # Windows
+    .venv\Scripts\activate
+    # Mac/Linux
+    source .venv/bin/activate
+    ```
+
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Configure Environment:**
+    Copy `.env.example` to `.env` and fill in your API keys.
+    ```bash
+    cp .env.example .env
+    ```
+    **Required Variables:**
+    - `LLM_API_KEY`: Your API key (e.g., Groq or OpenAI key)
+    - `LLM_API_BASE`: API Base URL (default: `https://api.groq.com/openai/v1`)
+    - `LLM_MODEL`: Model name (default: `llama3-70b-8192`)
+
+### 2. Running the Application
+
+**Start the Backend API:**
+```bash
+uvicorn api.app:app --reload --port 8000
+```
+
+**Start the Frontend UI:**
+```bash
+streamlit run frontend/streamlit_app.py
+```
+
+Access the UI at `http://localhost:8501`.
+
+### 3. Running with Docker
+
+Ensure Docker Desktop is running.
+
+```bash
+docker-compose up --build
+```
+This will start both the backend (port 8000) and frontend (port 8501).
+
+---
+
+## 🛠️ Configuration
+
+Configuration is managed via `configs/settings.py` and environment variables. Key settings:
+
+- `EMBEDDING_MODEL_NAME`: Default `sentence-transformers/all-MiniLM-L6-v2`
+- `RERANKER_MODEL_NAME`: Default `cross-encoder/ms-marco-MiniLM-L-6-v2`
+- `LLM_TEMPERATURE`: Default `0.0` (for deterministic output)
+- `UPLOAD_DIR`: Where PDFs are stored (`storage/uploads`)
+- `INDEX_DIR`: Where FAISS index is stored (`storage/index`)
+
+---
+
+## 🧪 Testing
+
+Run unit tests to verify the pipeline logic:
+
+```bash
+pytest tests/
+```
 
 ---
 
@@ -42,27 +130,19 @@ Large Language Models (LLMs) frequently hallucinate, especially on knowledge-int
 
 ![Hallucination-Controlled Academic RAG Architecture](./assets/rag_architecture.png)
 
-*Figure: Offline index construction and online inference pipeline with retrieval gating, citation-aware generation, faithfulness verification, confidence scoring, and abstention mechanism.*
+1.  **Ingestion**: PDFs are chunked semantically based on sentence boundaries and similarity.
+2.  **Retrieval**: Bi-encoder retrieval (FAISS) fetches top-20 candidates.
+3.  **Reranking**: Cross-encoder reranks top candidates for precision.
+4.  **Generation**: LLM generates answer using *only* the provided context.
+5.  **Verification**: Answer is split into sentences and verified against evidence.
+6.  **Citation**: Citations are mapped back to original PDF pages.
 
 ---
 
-## 🚀 Quick Start
+## 🤝 Contributing
 
-### Installation
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/hallucination-controlled-academic-rag.git
-cd hallucination-controlled-academic-rag
+## 📄 License
 
-# Create virtual environment
-python -m venv .venv
-
-# Activate (Linux/Mac)
-source .venv/bin/activate
-
-# Activate (Windows)
-.venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
+[MIT](https://choosealicense.com/licenses/mit/)

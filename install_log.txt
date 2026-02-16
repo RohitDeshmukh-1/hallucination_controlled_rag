@@ -1,0 +1,49 @@
+Collecting numpy<2.0.0,>=1.24.0 (from -r requirements.txt (line 11))
+  Using cached numpy-1.26.4.tar.gz (15.8 MB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Installing backend dependencies: started
+  Installing backend dependencies: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'error'
+  error: subprocess-exited-with-error
+  
+  Preparing metadata (pyproject.toml) did not run successfully.
+  exit code: 1
+  
+  [19 lines of output]
+  + C:\ML\hallucination_controlled_rag\ingestion\ragenv\Scripts\python.exe C:\Users\rohit\AppData\Local\Temp\pip-install-gzffpmcs\numpy_03c232a2062d40c39e779d41299e0c7b\vendored-meson\meson\meson.py setup C:\Users\rohit\AppData\Local\Temp\pip-install-gzffpmcs\numpy_03c232a2062d40c39e779d41299e0c7b C:\Users\rohit\AppData\Local\Temp\pip-install-gzffpmcs\numpy_03c232a2062d40c39e779d41299e0c7b\.mesonpy-4hjwogol -Dbuildtype=release -Db_ndebug=if-release -Db_vscrt=md --native-file=C:\Users\rohit\AppData\Local\Temp\pip-install-gzffpmcs\numpy_03c232a2062d40c39e779d41299e0c7b\.mesonpy-4hjwogol\meson-python-native-file.ini
+  The Meson build system
+  Version: 1.2.99
+  Source dir: C:\Users\rohit\AppData\Local\Temp\pip-install-gzffpmcs\numpy_03c232a2062d40c39e779d41299e0c7b
+  Build dir: C:\Users\rohit\AppData\Local\Temp\pip-install-gzffpmcs\numpy_03c232a2062d40c39e779d41299e0c7b\.mesonpy-4hjwogol
+  Build type: native build
+  Project name: NumPy
+  Project version: 1.26.4
+  C compiler for the host machine: gcc (gcc 6.3.0 "gcc (MinGW.org GCC-6.3.0-1) 6.3.0")
+  C linker for the host machine: gcc ld.bfd 2.28
+  C++ compiler for the host machine: c++ (gcc 6.3.0 "c++ (MinGW.org GCC-6.3.0-1) 6.3.0")
+  C++ linker for the host machine: c++ ld.bfd 2.28
+  Cython compiler for the host machine: cython (cython 3.0.12)
+  Host machine cpu family: x86
+  Host machine cpu: x86
+  
+  ..\meson.build:28:4: ERROR: Problem encountered: NumPy requires GCC >= 8.4
+  
+  A full log can be found at C:\Users\rohit\AppData\Local\Temp\pip-install-gzffpmcs\numpy_03c232a2062d40c39e779d41299e0c7b\.mesonpy-4hjwogol\meson-logs\meson-log.txt
+  [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+
+[notice] A new release of pip is available: 25.2 -> 26.0.1
+[notice] To update, run: python.exe -m pip install --upgrade pip
+error: metadata-generation-failed
+
+Encountered error while generating package metadata.
+
+See above for output.
+
+note: This is an issue with the package mentioned above, not pip.
+hint: See above for details.

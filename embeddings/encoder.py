@@ -1,18 +1,22 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 import numpy as np
 from sentence_transformers import SentenceTransformer
+from configs.settings import settings
 
 
 class EmbeddingEncoder:
     """
     High-performance embedding encoder with query caching.
+    
+    Ideally should be instantiated once as a singleton to avoid reloading the model.
     """
 
     def __init__(
         self,
-        model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
+        model_name: str = settings.EMBEDDING_MODEL_NAME,
+        device: str = "cuda" if settings.USE_GPU else "cpu"
     ):
-        self.model = SentenceTransformer(model_name)
+        self.model = SentenceTransformer(model_name, device=device)
         self._query_cache: Dict[str, np.ndarray] = {}
 
     def embed_query(self, query: str) -> np.ndarray:
