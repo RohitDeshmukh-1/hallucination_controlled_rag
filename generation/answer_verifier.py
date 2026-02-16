@@ -1,48 +1,47 @@
-from typing import List, Dict
+from typing import List, Dict, Any, Optional
 import re
-
+import logging
 import numpy as np
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from configs.settings import settings
+
+logger = logging.getLogger(__name__)
 
 
 class AnswerVerifier:
     """
     Verifies whether an LLM-generated answer is fully supported
     by the retrieved evidence chunks.
-
-    The verifier operates at the sentence level with configurable
-    tolerance. It allows partial support while maintaining
-    hallucination awareness.
     """
 
-    # Short filler phrases that don't require evidence grounding
     FILLER_PATTERNS = [
-        r"^(yes|no|however|therefore|thus|in summary|to summarize|in conclusion)[,.]?$",
-        r"^(this|that|it) (is|was|means|suggests|indicates)",
-        r"^(based on|according to) (the|this)",
-        r"^(let me|i will|i can)",
+        r"^(yes|no|however|therefore|thus|in summary|to summarize|in conclusion|overall|additionally|furthermore|moreover)[,.]?$",
+        r"^(this|that|it|these|those) (is|was|are|were|means|suggests|indicates|shows|demonstrates)",
+        r"^(based on|according to) (the|this|these)",
+        r"^(let me|i will|i can|note that|it is worth)",
+        r"^(in other words|that is|for example|for instance|specifically)",
     ]
 
     def __init__(
         self,
-        model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
-        similarity_threshold: float = 0.50,
-        min_unsupported_ratio: float = 0.4,
+        encoder_model: Any,
+        similarity_threshold: float = settings.VERIFICATION_SIMILARITY_THRESHOLD,
+        min_unsupported_ratio: float = settings.VERIFICATION_UNSUPPORTED_RATIO,
         min_sentence_length: int = 20,
     ):
         """
         Parameters
         ----------
+        encoder_model : Any
+            A sentence-transformer model or compatible object with .encode() method.
         similarity_threshold : float
             Minimum cosine similarity to consider a sentence supported.
         min_unsupported_ratio : float
             Maximum ratio of unsupported sentences before rejection.
-            E.g., 0.4 means up to 40% unsupported is tolerated.
         min_sentence_length : int
             Sentences shorter than this are skipped (likely filler).
         """
-        self.model = SentenceTransformer(model_name)
+        self.model = encoder_model
         self.similarity_threshold = similarity_threshold
         self.min_unsupported_ratio = min_unsupported_ratio
         self.min_sentence_length = min_sentence_length
@@ -66,8 +65,10 @@ class AnswerVerifier:
         -------
         Dict[str, object]
             {
-                "verdict": "supported" | "unsupported",
-                "unsupported_sentences": List[str]
+                "verdict": "supported" | "partially_supported" | "unsupported",
+                "unsupported_sentences": List[str],
+                "confidence": float,
+                "support_ratio": float,
             }
         """
 
@@ -83,11 +84,11 @@ class AnswerVerifier:
         ]
 
         if not substantive_sentences:
-            # All sentences are filler - accept as supported
             return {
                 "verdict": "supported",
                 "unsupported_sentences": [],
                 "confidence": 1.0,
+                "support_ratio": 1.0,
             }
 
         sentence_embeddings = self.model.encode(
@@ -112,9 +113,16 @@ class AnswerVerifier:
             if max_sim < self.similarity_threshold:
                 unsupported.append(substantive_sentences[idx])
 
-        # Calculate support ratio and confidence
         unsupported_ratio = len(unsupported) / len(substantive_sentences)
         avg_confidence = float(np.mean(sentence_scores))
+
+        logger.info(
+            "Verification: %d/%d substantive sentences supported (threshold=%.2f, avg_sim=%.3f)",
+            len(substantive_sentences) - len(unsupported),
+            len(substantive_sentences),
+            self.similarity_threshold,
+            avg_confidence,
+        )
 
         if unsupported_ratio > self.min_unsupported_ratio:
             return {
@@ -140,21 +148,24 @@ class AnswerVerifier:
         }
 
     def _split_into_sentences(self, text: str) -> List[str]:
-        """
-        Split text into sentences using conservative punctuation rules.
-        """
+        """Split text into sentences using conservative punctuation rules."""
         parts = re.split(r"(?<=[.!?])\s+", text.strip())
         return [p.strip() for p in parts if p.strip()]
 
     def _is_substantive(self, sentence: str) -> bool:
         """
         Check if a sentence is substantive (requires evidence grounding).
-        Short sentences and common filler phrases are skipped.
+        Short sentences, filler phrases, and citation-only references are skipped.
         """
         if len(sentence) < self.min_sentence_length:
             return False
 
-        sentence_lower = sentence.lower().strip()
+        # Strip citation markers before checking
+        clean = re.sub(r"\[E\d+\]", "", sentence).strip()
+        if len(clean) < self.min_sentence_length:
+            return False
+
+        sentence_lower = clean.lower().strip()
         for pattern in self.FILLER_PATTERNS:
             if re.match(pattern, sentence_lower):
                 return False
@@ -162,9 +173,7 @@ class AnswerVerifier:
         return True
 
     def _unsupported(self, sentences: List[str]) -> Dict[str, object]:
-        """
-        Construct an unsupported verdict payload.
-        """
+        """Construct an unsupported verdict payload."""
         return {
             "verdict": "unsupported",
             "unsupported_sentences": sentences,
