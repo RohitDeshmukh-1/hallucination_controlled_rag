@@ -100,6 +100,55 @@ docker-compose up --build
 ```
 This will start both the backend (port 8000) and frontend (port 8501).
 
+### 4. Deploy to a Public IP (Ubuntu + Docker)
+
+If you want other machines to access the app over the internet, use this flow on a Linux VM with a public IP.
+
+1. **Prepare the server**
+   ```bash
+   sudo apt update && sudo apt install -y docker.io docker-compose-plugin ufw git
+   sudo systemctl enable --now docker
+   sudo usermod -aG docker $USER
+   # log out / log back in once so group membership is applied
+   ```
+
+2. **Clone and configure the project**
+   ```bash
+   git clone <your-repo-url>
+   cd hallucination_controlled_rag
+   cp .env.example .env
+   # edit .env and set your LLM credentials
+   nano .env
+   ```
+
+3. **Start the stack in detached mode**
+   ```bash
+   docker compose up -d --build
+   docker compose ps
+   ```
+
+4. **Open required firewall ports**
+   ```bash
+   sudo ufw allow 22/tcp
+   sudo ufw allow 8000/tcp
+   sudo ufw allow 8501/tcp
+   sudo ufw --force enable
+   sudo ufw status
+   ```
+
+5. **Access from your browser**
+   - Frontend: `http://<YOUR_PUBLIC_IP>:8501`
+   - Backend docs: `http://<YOUR_PUBLIC_IP>:8000/docs`
+
+#### Optional: Production hardening with Nginx + domain + TLS
+
+For production, avoid exposing 8000/8501 directly. Put Nginx in front of the app and terminate HTTPS:
+
+- Proxy `/` -> `http://127.0.0.1:8501`
+- (Optional) Proxy `/api` -> `http://127.0.0.1:8000`
+- Use Let's Encrypt (`certbot`) for certificates
+- Only expose ports `80` and `443` publicly
+
 ---
 
 ## 🛠️ Configuration
