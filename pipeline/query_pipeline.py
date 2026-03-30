@@ -9,16 +9,31 @@ from generation.citation_extractor import CitationExtractor
 
 logger = logging.getLogger(__name__)
 
+# Try to import the NLI verifier; graceful fallback if deps are missing
+_nli_available = False
+try:
+    from evaluation.nli_verifier import NLIVerifier
+    _nli_available = True
+except ImportError:
+    logger.info("NLI verifier not available — skipping NLI-based verification.")
+
 
 def run_query_pipeline(
     question: str,
     encoder: EmbeddingEncoder,
     index: FaissIndex,
     reranker: CrossEncoderReranker,
-    llm: LLMClient
+    llm: LLMClient,
+    enable_nli: bool = False,
 ) -> dict:
     """
     Run the full query pipeline: retrieve → rerank → generate → verify → cite.
+
+    Parameters
+    ----------
+    enable_nli : bool
+        If True and NLI model is available, runs dual-layer verification
+        (cosine similarity + NLI entailment).
     """
 
     # Hard guards
@@ -71,7 +86,7 @@ def run_query_pipeline(
     citation_extractor = CitationExtractor()
     citation_result = citation_extractor.extract_and_map(answer, evidence)
 
-    # Verify answer against evidence
+    # Verify answer against evidence (cosine similarity)
     verifier = AnswerVerifier(encoder_model=encoder.model)
     verification = verifier.verify(answer, evidence)
 
@@ -81,6 +96,20 @@ def run_query_pipeline(
         verification.get("confidence", 0),
         verification.get("support_ratio", 0),
     )
+
+    # Optional NLI verification (dual-layer)
+    nli_result = None
+    if enable_nli and _nli_available:
+        try:
+            nli_verifier = NLIVerifier()
+            nli_result = nli_verifier.verify(answer, evidence)
+            logger.info(
+                "NLI verdict: %s (entailment_ratio=%.3f)",
+                nli_result["verdict"],
+                nli_result.get("entailment_ratio", 0),
+            )
+        except Exception as e:
+            logger.warning("NLI verification failed: %s", e)
 
     # Build detailed citations from extraction (only cited evidence)
     citations = [
@@ -102,25 +131,33 @@ def run_query_pipeline(
             "citation_coverage": 0.0,
         }
 
+    # Base response
+    response = {
+        "confidence": verification.get("confidence", 0.0),
+        "support_ratio": verification.get("support_ratio", 0.0),
+        "citation_coverage": citation_result["citation_coverage"],
+        "citations": citations,
+    }
+
+    # Add NLI results if available
+    if nli_result:
+        response["nli_verdict"] = nli_result["verdict"]
+        response["nli_entailment_ratio"] = nli_result["entailment_ratio"]
+
     if verification["verdict"] == "partially_supported":
         caveat = (
             "\n\n*Note: Some aspects of this answer may have limited "
             "direct support in the source documents.*"
         )
-        return {
+        response.update({
             "answer": answer + caveat,
             "verdict": "partially_supported",
-            "citations": citations,
-            "confidence": verification.get("confidence", 0.0),
-            "support_ratio": verification.get("support_ratio", 0.0),
-            "citation_coverage": citation_result["citation_coverage"],
             "uncited_sentences": citation_result["uncited_sentences"],
-        }
+        })
+        return response
 
-    return {
+    response.update({
         "answer": answer,
         "verdict": "supported",
-        "citations": citations,
-        "confidence": verification.get("confidence", 1.0),
-        "citation_coverage": citation_result["citation_coverage"],
-    }
+    })
+    return response
