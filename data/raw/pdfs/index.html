@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LockKiyaJaye – Mobile UI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0A0A0F;
+  --surface: #111118;
+  --surface2: #16161F;
+  --border: #1E1E2E;
+  --accent: #7C5CFC;
+  --accent2: #FC5C7D;
+  --gold: #F5C842;
+  --green: #22D39A;
+  --red: #FF4D6D;
+  --text: #F0EFF8;
+  --muted: #6B6B8A;
+  --subtle: #2A2A3E;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #060609;
+  font-family: 'Instrument Sans', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ─── PAGE CANVAS ─── */
+.canvas {
+  padding: 40px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 70px;
+}
+
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+/* ─── PHONE SHELL ─── */
+.phone {
+  width: 375px;
+  background: #0A0A0F;
+  border-radius: 44px;
+  border: 1px solid #222233;
+  box-shadow:
+    0 60px 140px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(255,255,255,0.05),
+    inset 0 0 0 1px rgba(255,255,255,0.03);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Notch / dynamic island */
+.island {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 34px;
+  background: #000;
+  border-radius: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 12px;
+  gap: 6px;
+}
+
+.island-cam {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #111;
+  border: 2px solid #1a1a2e;
+  position: relative;
+}
+
+.island-cam::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #2a2a4e, #0a0a1e);
+}
+
+/* Status bar */
+.status-bar {
+  height: 56px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 28px 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+/* Screen content area */
+.screen-content {
+  min-height: 720px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Bottom home indicator */
+.home-bar {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+}
+
+.home-pill {
+  width: 120px;
+  height: 5px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+}
+
+/* ─── COMMON COMPONENTS ─── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 10px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.logo span { color: var(--accent); }
+
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+
+.bottom-nav {
+  display: flex;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 10px 0 6px;
+  flex-shrink: 0;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+}
+
+.tab.active { color: var(--accent); }
+
+.tab-icon { font-size: 20px; }
+
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px 16px 0;
+  scrollbar-width: none;
+}
+
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* Tags */
+.tag {
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  display: inline-block;
+}
+
+.tag-green  { background: rgba(34,211,154,0.12); color: var(--green);   border: 1px solid rgba(34,211,154,0.2); }
+.tag-pink   { background: rgba(252,92,125,0.12);  color: var(--accent2); border: 1px solid rgba(252,92,125,0.2); }
+.tag-purple { background: rgba(124,92,252,0.15);  color: var(--accent);  border: 1px solid rgba(124,92,252,0.25); }
+.tag-muted  { background: rgba(255,255,255,0.05); color: var(--muted);   border: 1px solid var(--border); }
+.tag-gold   { background: rgba(245,200,66,0.1);   color: var(--gold);    border: 1px solid rgba(245,200,66,0.25); }
+
+/* Buttons */
+.btn {
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(124,92,252,0.35);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  font-size: 14px;
+  padding: 12px;
+}
+
+.btn-green {
+  background: rgba(34,211,154,0.15);
+  color: var(--green);
+  border: 1px solid rgba(34,211,154,0.25);
+  font-size: 13px;
+  padding: 10px;
+}
+
+.btn-sm {
+  width: auto;
+  padding: 7px 14px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+/* Card */
+.card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* Divider */
+.div { height: 1px; background: var(--border); margin: 12px 0; }
+
+/* ─── GLOBAL HEADER ─── */
+.global-header {
+  text-align: center;
+  padding: 50px 20px 0;
+}
+
+.global-header h1 {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.global-header h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--text) 30%, var(--muted));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.global-header p {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.screens-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 50px;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ════════════════ SCREEN SPECIFIC ════════════════ */
+
+/* ── S1: SPLASH / LOGIN ── */
+.splash-bg {
+  background: var(--bg);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.splash-glow {
+  position: absolute;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,92,252,0.22) 0%, transparent 70%);
+  top: -60px; left: 50%; transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.splash-glow2 {
+  position: absolute;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(252,92,125,0.14) 0%, transparent 70%);
+  bottom: 80px; right: -40px;
+  pointer-events: none;
+}
+
+.splash-logo-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  position: relative;
+  z-index: 1;
+}
+
+.splash-icon {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  box-shadow: 0 16px 40px rgba(124,92,252,0.4);
+}
+
+.splash-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.splash-title span { color: var(--accent); }
+
+.splash-sub {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  max-width: 240px;
+  line-height: 1.6;
+}
+
+.pills-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.pill {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 100px;
+  padding: 5px 12px;
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+
+.field {
+  margin-bottom: 14px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.field label {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.field input {
+  width: 100%;
+  background: var(--subtle);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 16px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.field input::placeholder { color: var(--muted); }
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.or-divider span { font-size: 12px; color: var(--muted); }
+.or-divider::before, .or-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── S2: HOME DASHBOARD ── */
+.greeting-banner {
+  background: linear-gradient(120deg, rgba(124,92,252,0.15), rgba(252,92,125,0.08));
+  border: 1px solid rgba(124,92,252,0.2);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.greeting-text { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+.greeting-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.kpi {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.06;
+  background: linear-gradient(135deg, var(--kc), transparent);
+}
+
+.kpi.c1 { --kc: var(--accent); }
+.kpi.c2 { --kc: var(--green); }
+.kpi.c3 { --kc: var(--gold); }
+.kpi.c4 { --kc: var(--red); }
+
+.kpi-icon { font-size: 18px; margin-bottom: 8px; }
+.kpi-val  { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; }
+.kpi-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.kpi-badge {
+  position: absolute;
+  top: 10px; right: 10px;
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 100px;
+}
+
+.kpi-badge.up { background: rgba(34,211,154,0.12); color: var(--green); }
+.kpi-badge.dn { background: rgba(255,77,109,0.12);  color: var(--red); }
+
+.booking-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.booking-item:last-child { border-bottom: none; }
+
+.b-avatar {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.b-name   { font-size: 13px; font-weight: 500; }
+.b-detail { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.qa {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.qa-icon { font-size: 22px; }
+.qa-label { font-size: 13px; font-weight: 500; }
+.qa-sub   { font-size: 11px; color: var(--muted); }
+
+/* ── S3: SEAT MAP ── */
+.filter-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.filter-row::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.filter-chip.active {
+  background: rgba(124,92,252,0.15);
+  border-color: rgba(124,92,252,0.3);
+  color: var(--accent);
+}
+
+.stage-bar {
+  background: rgba(124,92,252,0.08);
+  border: 1px solid rgba(124,92,252,0.15);
+  border-radius: 10px;
+  text-align: center;
+  padding: 8px;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: var(--muted);
+  margin-bottom: 14px;
+  letter-spacing: 2px;
+}
+
+.seat-grid {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.seat {
+  aspect-ratio: 1;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8.5px;
+  font-family: 'DM Mono', monospace;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+
+.seat:hover, .seat:active { transform: scale(1.12); }
+
+.seat.available { background: rgba(124,92,252,0.15); border: 1px solid rgba(124,92,252,0.3); color: var(--accent); }
+.seat.booked    { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); color: var(--muted); cursor: default; }
+.seat.selected  { background: var(--accent); border: 1px solid var(--accent); color: #fff; box-shadow: 0 0 12px rgba(124,92,252,0.5); }
+.seat.locked    { background: rgba(252,92,125,0.12); border: 1px solid rgba(252,92,125,0.25); color: var(--accent2); cursor: default; }
+.seat.vip       { background: rgba(245,200,66,0.1);  border: 1px solid rgba(245,200,66,0.25); color: var(--gold); }
+
+.legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.leg { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.leg-dot { width: 9px; height: 9px; border-radius: 3px; }
+
+.seat-summary {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.ss-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.ss-row:last-child { border-bottom: none; }
+.ss-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+
+/* ── S4: WAITLIST ── */
+.queue-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.queue-rank {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  min-width: 32px;
+  text-align: center;
+}
+
+.queue-info { flex: 1; }
+.queue-name  { font-size: 14px; font-weight: 600; }
+.queue-email { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.queue-meta  { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+
+.pbar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pbar-track {
+  flex: 1;
+  height: 4px;
+  background: var(--subtle);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pbar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+
+.pval {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  min-width: 24px;
+  text-align: right;
+}
+
+.algo-pills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.algo-pill {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+}
+
+.algo-val   { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; }
+.algo-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+/* ── S5: ADMIN ── */
+.live-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.activity-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.activity-item:last-child { border-bottom: none; }
+
+.act-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.act-text { font-size: 12px; line-height: 1.5; }
+.act-time { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+.mini-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mini-kpi {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.mini-kpi-val   { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; }
+.mini-kpi-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.donut-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0 16px;
+  position: relative;
+}
+
+.donut-center {
+  position: absolute;
+  text-align: center;
+}
+
+.donut-pct  { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
+.donut-sub  { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+
+/* ── S6: BOOKING CONFIRM ── */
+.confirm-icon {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, rgba(34,211,154,0.2), rgba(34,211,154,0.1));
+  border: 2px solid rgba(34,211,154,0.3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin: 24px auto 16px;
+  box-shadow: 0 0 40px rgba(34,211,154,0.2);
+}
+
+.confirm-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.confirm-sub { font-size: 13px; color: var(--muted); text-align: center; margin-top: 4px; }
+
+.txn-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.txn-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.txn-row:last-child { border-bottom: none; }
+.txn-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.txn-val   { font-weight: 500; }
+
+.barcode {
+  background: repeating-linear-gradient(90deg, var(--text) 0px, var(--text) 2px, transparent 2px, transparent 5px),
+              repeating-linear-gradient(90deg, var(--text) 0px, var(--text) 1px, transparent 1px, transparent 8px),
+              repeating-linear-gradient(90deg, var(--text) 0px, var(--text) 3px, transparent 3px, transparent 7px);
+  height: 50px;
+  border-radius: 4px;
+  opacity: 0.12;
+  margin: 16px 0;
+}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ PAGE HEADER ═══════════════ -->
+<div class="global-header">
+  <h1>Mobile UI Design</h1>
+  <h2>LockKiyaJaye</h2>
+  <p>6 phone screens · Smart Reservation System</p>
+</div>
+
+<!-- ═══════════════ ROW 1: LOGIN + DASHBOARD ═══════════════ -->
+<div class="canvas">
+  <div class="screens-row">
+
+    <!-- ──── SCREEN 1: LOGIN / SPLASH ──── -->
+    <div>
+      <div class="section-label">01 · Login</div>
+      <div class="phone">
+        <div class="island"><div class="island-cam"></div></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <div class="status-right">
+            <span>●●●●</span>
+            <span>WiFi</span>
+            <span>🔋</span>
+          </div>
+        </div>
+        <div class="screen-content">
+          <div class="splash-bg">
+            <div class="splash-glow"></div>
+            <div class="splash-glow2"></div>
+            <div class="splash-logo-block">
+              <div class="splash-icon">🔒</div>
+              <div class="splash-title">Lock<span>Kiya</span>Jaye</div>
+              <div class="splash-sub">High-concurrency seat booking with fairness-first allocation</div>
+            </div>
+            <div class="pills-row">
+              <div class="pill">⚡ ACID</div>
+              <div class="pill">🔄 Waitlist</div>
+              <div class="pill">🛡 No Overbooking</div>
+            </div>
+            <div class="field">
+              <label>EMAIL ADDRESS</label>
+              <input type="email" placeholder="dhruv@example.com" readonly>
+            </div>
+            <div class="field" style="margin-bottom:18px;">
+              <label>PASSWORD</label>
+              <input type="password" placeholder="••••••••" readonly>
+            </div>
+            <button class="btn btn-primary">🔑 Sign In</button>
+            <div class="or-divider"><span>or</span></div>
+            <button class="btn btn-outline">Create an Account</button>
+            <div style="margin-top:16px;font-size:11px;color:var(--muted);text-align:center;font-family:'DM Mono',monospace;">
+              admin@lockkiyajaye.io · admin123
+            </div>
+          </div>
+        </div>
+        <div class="home-bar"><div class="home-pill"></div></div>
+      </div>
+    </div>
+
+    <!-- ──── SCREEN 2: DASHBOARD ──── -->
+    <div>
+      <div class="section-label">02 · Dashboard</div>
+      <div class="phone">
+        <div class="island"><div class="island-cam"></div></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <div class="status-right"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+        </div>
+        <div class="screen-content">
+          <div class="topbar">
+            <div class="logo">Lock<span>Kiya</span>Jaye</div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <span style="font-size:18px;">🔔</span>
+              <div class="avatar">DS</div>
+            </div>
+          </div>
+          <div class="scroll-area">
+            <div class="greeting-banner">
+              <span style="font-size:28px;">👋</span>
+              <div>
+                <div class="greeting-text">Good morning, Dhruv</div>
+                <div class="greeting-sub">68% seats booked · 3 on waitlist</div>
+              </div>
+            </div>
+            <div class="kpi-grid">
+              <div class="kpi c1">
+                <div class="kpi-icon">💺</div>
+                <div class="kpi-val">340</div>
+                <div class="kpi-label">TOTAL SEATS</div>
+                <div class="kpi-badge up">+5%</div>
+              </div>
+              <div class="kpi c2">
+                <div class="kpi-icon">✅</div>
+                <div class="kpi-val">218</div>
+                <div class="kpi-label">AVAILABLE</div>
+                <div class="kpi-badge up">+12</div>
+              </div>
+              <div class="kpi c3">
+                <div class="kpi-icon">⏳</div>
+                <div class="kpi-val">3</div>
+                <div class="kpi-label">WAITLIST</div>
+                <div class="kpi-badge dn">-1</div>
+              </div>
+              <div class="kpi c4">
+                <div class="kpi-icon">🔒</div>
+                <div class="kpi-val">7</div>
+                <div class="kpi-label">LOCKED TX</div>
+                <div class="kpi-badge up">live</div>
+              </div>
+            </div>
+            <div class="quick-actions">
+              <div class="qa">
+                <div class="qa-icon">🎫</div>
+                <div class="qa-label">Book Seat</div>
+                <div class="qa-sub">12 available now</div>
+              </div>
+              <div class="qa">
+                <div class="qa-icon">⏳</div>
+                <div class="qa-label">Join Queue</div>
+                <div class="qa-sub">Priority score: 72</div>
+              </div>
+              <div class="qa">
+                <div class="qa-icon">📋</div>
+                <div class="qa-label">My Bookings</div>
+                <div class="qa-sub">1 active</div>
+              </div>
+              <div class="qa">
+                <div class="qa-icon">📊</div>
+                <div class="qa-label">Analytics</div>
+                <div class="qa-sub">Admin only</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Recent Activity</div>
+                <div style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;">View all</div>
+              </div>
+              <div class="booking-item">
+                <div class="b-avatar" style="background:rgba(124,92,252,0.15);">🎫</div>
+                <div style="flex:1;">
+                  <div class="b-name">Seat A-05 Confirmed</div>
+                  <div class="b-detail">TXN-0041 · 09:41 AM</div>
+                </div>
+                <span class="tag tag-green">Done</span>
+              </div>
+              <div class="booking-item">
+                <div class="b-avatar" style="background:rgba(252,92,125,0.12);">🔒</div>
+                <div style="flex:1;">
+                  <div class="b-name">B-07 Locked by TX</div>
+                  <div class="b-detail">Thread-07 · 09:38 AM</div>
+                </div>
+                <span class="tag tag-pink">Locked</span>
+              </div>
+              <div class="booking-item">
+                <div class="b-avatar" style="background:rgba(245,200,66,0.1);">⏳</div>
+                <div style="flex:1;">
+                  <div class="b-name">Riya added to Queue</div>
+                  <div class="b-detail">Score 87 · 09:35 AM</div>
+                </div>
+                <span class="tag tag-muted">#1</span>
+              </div>
+            </div>
+            <div style="height:16px;"></div>
+          </div>
+          <div class="bottom-nav">
+            <div class="tab active"><span class="tab-icon">🏠</span>Home</div>
+            <div class="tab"><span class="tab-icon">💺</span>Seats</div>
+            <div class="tab"><span class="tab-icon">⏳</span>Queue</div>
+            <div class="tab"><span class="tab-icon">📋</span>Bookings</div>
+            <div class="tab"><span class="tab-icon">👤</span>Profile</div>
+          </div>
+        </div>
+        <div class="home-bar"><div class="home-pill"></div></div>
+      </div>
+    </div>
+
+    <!-- ──── SCREEN 3: SEAT MAP ──── -->
+    <div>
+      <div class="section-label">03 · Seat Map</div>
+      <div class="phone">
+        <div class="island"><div class="island-cam"></div></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <div class="status-right"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+        </div>
+        <div class="screen-content">
+          <div class="topbar">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:18px;color:var(--muted);">←</span>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">Select Seat</div>
+            </div>
+            <span class="tag tag-purple" style="font-size:10px;">Hall A</span>
+          </div>
+          <div class="scroll-area">
+            <div class="filter-row">
+              <div class="filter-chip active">All</div>
+              <div class="filter-chip">Available</div>
+              <div class="filter-chip">VIP</div>
+              <div class="filter-chip">Aisle</div>
+              <div class="filter-chip">Window</div>
+            </div>
+            <div class="stage-bar">← STAGE / SCREEN →</div>
+            <div class="legend">
+              <div class="leg"><div class="leg-dot" style="background:rgba(124,92,252,0.5);border:1px solid var(--accent);"></div>Free</div>
+              <div class="leg"><div class="leg-dot" style="background:var(--accent);"></div>Yours</div>
+              <div class="leg"><div class="leg-dot" style="background:rgba(255,255,255,0.06);"></div>Taken</div>
+              <div class="leg"><div class="leg-dot" style="background:rgba(252,92,125,0.3);"></div>Locked</div>
+              <div class="leg"><div class="leg-dot" style="background:rgba(245,200,66,0.2);"></div>VIP</div>
+            </div>
+            <div class="seat-grid" id="mobileSeatGrid" style="grid-template-columns:repeat(8,1fr);"></div>
+            <div class="seat-summary">
+              <div class="ss-row">
+                <div class="ss-label">SELECTED</div>
+                <span class="tag tag-purple">A-05</span>
+              </div>
+              <div class="ss-row">
+                <div class="ss-label">STATUS</div>
+                <span class="tag tag-green">Available</span>
+              </div>
+              <div class="ss-row">
+                <div class="ss-label">LOCK STATUS</div>
+                <span class="tag tag-green">Unlocked</span>
+              </div>
+              <div class="ss-row">
+                <div class="ss-label">TX ISOLATION</div>
+                <span class="tag tag-purple" style="font-size:9px;">SERIALIZABLE</span>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="margin-bottom:10px;">🎫 Confirm Booking</button>
+            <button class="btn btn-outline">Join Waitlist Instead</button>
+            <div style="height:16px;"></div>
+          </div>
+          <div class="bottom-nav">
+            <div class="tab"><span class="tab-icon">🏠</span>Home</div>
+            <div class="tab active"><span class="tab-icon">💺</span>Seats</div>
+            <div class="tab"><span class="tab-icon">⏳</span>Queue</div>
+            <div class="tab"><span class="tab-icon">📋</span>Bookings</div>
+            <div class="tab"><span class="tab-icon">👤</span>Profile</div>
+          </div>
+        </div>
+        <div class="home-bar"><div class="home-pill"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /row1 -->
+
+  <!-- ═══════════════ ROW 2 ═══════════════ -->
+  <div class="screens-row">
+
+    <!-- ──── SCREEN 4: WAITLIST ──── -->
+    <div>
+      <div class="section-label">04 · Waitlist Queue</div>
+      <div class="phone">
+        <div class="island"><div class="island-cam"></div></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <div class="status-right"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+        </div>
+        <div class="screen-content">
+          <div class="topbar">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:18px;color:var(--muted);">←</span>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">Waitlist</div>
+            </div>
+            <span class="tag tag-green" style="font-size:10px;display:flex;align-items:center;gap:5px;"><span class="live-dot"></span>Auto</span>
+          </div>
+          <div class="scroll-area">
+            <div class="algo-pills">
+              <div class="algo-pill">
+                <div class="algo-val" style="color:var(--accent);">FCFS</div>
+                <div class="algo-label">BASE ALGO</div>
+              </div>
+              <div class="algo-pill">
+                <div class="algo-val" style="color:var(--gold);">Fair</div>
+                <div class="algo-label">PRIORITY</div>
+              </div>
+              <div class="algo-pill">
+                <div class="algo-val" style="color:var(--green);">Auto</div>
+                <div class="algo-label">REALLOC</div>
+              </div>
+            </div>
+
+            <!-- Queue cards -->
+            <div class="queue-card">
+              <div class="queue-rank" style="color:var(--gold);">01</div>
+              <div class="queue-info">
+                <div class="queue-name">Riya Patel</div>
+                <div class="queue-email">riya@lkj.io · Wait: 4m 12s</div>
+                <div class="queue-meta">
+                  <span class="tag tag-purple" style="font-size:10px;">C-22</span>
+                  <span class="tag tag-green" style="font-size:10px;">Next Up</span>
+                </div>
+                <div class="pbar-wrap">
+                  <div class="pbar-track"><div class="pbar-fill" style="width:87%"></div></div>
+                  <span class="pval">87</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="queue-card">
+              <div class="queue-rank" style="color:var(--muted);">02</div>
+              <div class="queue-info">
+                <div class="queue-name">Siddharth M.</div>
+                <div class="queue-email">sid@lkj.io · Wait: 2m 55s</div>
+                <div class="queue-meta">
+                  <span class="tag tag-purple" style="font-size:10px;">C-22</span>
+                  <span class="tag tag-pink" style="font-size:10px;">Waiting</span>
+                </div>
+                <div class="pbar-wrap">
+                  <div class="pbar-track"><div class="pbar-fill" style="width:62%"></div></div>
+                  <span class="pval">62</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="queue-card">
+              <div class="queue-rank" style="color:var(--muted);">03</div>
+              <div class="queue-info">
+                <div class="queue-name">Avni Verma</div>
+                <div class="queue-email">avni@lkj.io · Wait: 1m 08s</div>
+                <div class="queue-meta">
+                  <span class="tag tag-muted" style="font-size:10px;">Any Seat</span>
+                  <span class="tag tag-pink" style="font-size:10px;">Waiting</span>
+                </div>
+                <div class="pbar-wrap">
+                  <div class="pbar-track"><div class="pbar-fill" style="width:41%"></div></div>
+                  <span class="pval">41</span>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" style="margin-top:4px;margin-bottom:10px;">+ Join This Queue</button>
+            <div style="height:16px;"></div>
+          </div>
+          <div class="bottom-nav">
+            <div class="tab"><span class="tab-icon">🏠</span>Home</div>
+            <div class="tab"><span class="tab-icon">💺</span>Seats</div>
+            <div class="tab active"><span class="tab-icon">⏳</span>Queue</div>
+            <div class="tab"><span class="tab-icon">📋</span>Bookings</div>
+            <div class="tab"><span class="tab-icon">👤</span>Profile</div>
+          </div>
+        </div>
+        <div class="home-bar"><div class="home-pill"></div></div>
+      </div>
+    </div>
+
+    <!-- ──── SCREEN 5: ADMIN ──── -->
+    <div>
+      <div class="section-label">05 · Admin Monitor</div>
+      <div class="phone">
+        <div class="island"><div class="island-cam"></div></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <div class="status-right"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+        </div>
+        <div class="screen-content">
+          <div class="topbar">
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">Admin Monitor</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span class="tag tag-purple" style="font-size:10px;">ADMIN</span>
+              <div class="avatar" style="background:linear-gradient(135deg,var(--gold),var(--accent2));">AD</div>
+            </div>
+          </div>
+          <div class="scroll-area">
+            <!-- Donut -->
+            <div class="card" style="padding:12px;">
+              <div class="card-header">
+                <div class="card-title">Capacity</div>
+                <span class="tag tag-green" style="font-size:10px;display:flex;align-items:center;gap:5px;"><span class="live-dot"></span>LIVE</span>
+              </div>
+              <div class="donut-wrap">
+                <svg width="130" height="130" viewBox="0 0 130 130" style="transform:rotate(-90deg)">
+                  <circle cx="65" cy="65" r="50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="14"/>
+                  <circle cx="65" cy="65" r="50" fill="none" stroke="url(#mg)" stroke-width="14"
+                    stroke-dasharray="314" stroke-dashoffset="100" stroke-linecap="round"/>
+                  <defs>
+                    <linearGradient id="mg" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" style="stop-color:#7C5CFC"/>
+                      <stop offset="100%" style="stop-color:#FC5C7D"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="donut-center">
+                  <div class="donut-pct">68%</div>
+                  <div class="donut-sub">Booked</div>
+                </div>
+              </div>
+              <div class="mini-kpi-row">
+                <div class="mini-kpi"><div class="mini-kpi-val" style="color:var(--green);">218</div><div class="mini-kpi-label">AVAILABLE</div></div>
+                <div class="mini-kpi"><div class="mini-kpi-val" style="color:var(--accent2);">122</div><div class="mini-kpi-label">BOOKED</div></div>
+                <div class="mini-kpi"><div class="mini-kpi-val" style="color:var(--gold);">7</div><div class="mini-kpi-label">LOCKED</div></div>
+                <div class="mini-kpi"><div class="mini-kpi-val" style="color:var(--accent);">0</div><div class="mini-kpi-label">DEADLOCKS</div></div>
+              </div>
+            </div>
+
+            <!-- Live Feed -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Live Feed</div>
+                <span class="tag tag-green" style="font-size:10px;display:flex;align-items:center;gap:5px;"><span class="live-dot"></span>Real-time</span>
+              </div>
+              <div class="activity-item">
+                <div class="act-dot" style="background:var(--green);box-shadow:0 0 6px var(--green)"></div>
+                <div>
+                  <div class="act-text">B-07 released → allocated to Riya Patel</div>
+                  <div class="act-time">09:41:22 · Thread-04</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="act-dot" style="background:var(--accent2);"></div>
+                <div>
+                  <div class="act-text">C-14 locked by Thread-07 · booking pending</div>
+                  <div class="act-time">09:41:18 · Thread-07</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="act-dot" style="background:var(--gold);"></div>
+                <div>
+                  <div class="act-text">Deadlock detected & resolved · D-01, D-02</div>
+                  <div class="act-time">09:40:31 · DLM</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="act-dot" style="background:var(--accent);"></div>
+                <div>
+                  <div class="act-text">TXN-0041 committed · Seat A-05 → Dhruv</div>
+                  <div class="act-time">09:39:47 · Thread-02</div>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-outline" style="border-color:rgba(255,77,109,0.3);color:var(--red);margin-bottom:16px;">
+              ⚠️ Release All Locks
+            </button>
+          </div>
+          <div class="bottom-nav">
+            <div class="tab"><span class="tab-icon">🏠</span>Home</div>
+            <div class="tab"><span class="tab-icon">💺</span>Seats</div>
+            <div class="tab"><span class="tab-icon">⏳</span>Queue</div>
+            <div class="tab"><span class="tab-icon">📋</span>Bookings</div>
+            <div class="tab active"><span class="tab-icon">👤</span>Profile</div>
+          </div>
+        </div>
+        <div class="home-bar"><div class="home-pill"></div></div>
+      </div>
+    </div>
+
+    <!-- ──── SCREEN 6: BOOKING CONFIRMED ──── -->
+    <div>
+      <div class="section-label">06 · Booking Confirmed</div>
+      <div class="phone">
+        <div class="island"><div class="island-cam"></div></div>
+        <div class="status-bar">
+          <span>9:41</span>
+          <div class="status-right"><span>●●●●</span><span>WiFi</span><span>🔋</span></div>
+        </div>
+        <div class="screen-content">
+          <div class="topbar">
+            <div style="font-size:18px;color:var(--muted);">✕</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;">Booking</div>
+            <span style="font-size:18px;">↑</span>
+          </div>
+          <div class="scroll-area">
+            <div class="confirm-icon">✅</div>
+            <div class="confirm-title">Booking Confirmed!</div>
+            <div class="confirm-sub">Your seat has been successfully reserved</div>
+
+            <div class="txn-card">
+              <div style="text-align:center;margin-bottom:12px;">
+                <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;">TRANSACTION ID</div>
+                <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);margin-top:4px;">TXN-20240218-0041</div>
+              </div>
+              <div class="barcode"></div>
+              <div class="txn-row">
+                <div class="txn-label">SEAT NO.</div>
+                <div class="txn-val"><span class="tag tag-purple">A-05</span></div>
+              </div>
+              <div class="txn-row">
+                <div class="txn-label">HALL</div>
+                <div class="txn-val">Hall A · Row A</div>
+              </div>
+              <div class="txn-row">
+                <div class="txn-label">BOOKED BY</div>
+                <div class="txn-val">Dhruv Sarda</div>
+              </div>
+              <div class="txn-row">
+                <div class="txn-label">STATUS</div>
+                <div class="txn-val"><span class="tag tag-green">CONFIRMED</span></div>
+              </div>
+              <div class="txn-row">
+                <div class="txn-label">ISOLATION</div>
+                <div class="txn-val"><span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);">SERIALIZABLE</span></div>
+              </div>
+              <div class="txn-row">
+                <div class="txn-label">TIMESTAMP</div>
+                <div class="txn-val" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">09:41:22 AM</div>
+              </div>
+            </div>
+
+            <div style="background:rgba(34,211,154,0.08);border:1px solid rgba(34,211,154,0.2);border-radius:12px;padding:12px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px;text-align:center;">
+              🔒 Seat lock released after commit.<br>ACID transaction completed successfully.
+            </div>
+
+            <button class="btn btn-primary" style="margin-bottom:10px;">🏠 Back to Dashboard</button>
+            <button class="btn btn-outline">📋 View My Bookings</button>
+            <div style="height:16px;"></div>
+          </div>
+          <div class="bottom-nav">
+            <div class="tab"><span class="tab-icon">🏠</span>Home</div>
+            <div class="tab"><span class="tab-icon">💺</span>Seats</div>
+            <div class="tab"><span class="tab-icon">⏳</span>Queue</div>
+            <div class="tab active"><span class="tab-icon">📋</span>Bookings</div>
+            <div class="tab"><span class="tab-icon">👤</span>Profile</div>
+          </div>
+        </div>
+        <div class="home-bar"><div class="home-pill"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /row2 -->
+</div><!-- /canvas -->
+
+<script>
+const R = 'ABCDEFGH';
+const COLS = 8;
+const states = {
+  '0-4':'selected','1-1':'locked','1-5':'booked',
+  '2-0':'booked','2-4':'booked','3-2':'locked',
+  '4-0':'vip','4-7':'vip','5-3':'booked',
+  '6-6':'booked','7-1':'locked'
+};
+
+const grid = document.getElementById('mobileSeatGrid');
+for(let r=0;r<8;r++){
+  for(let c=0;c<COLS;c++){
+    const k=`${r}-${c}`;
+    const s=states[k]||'available';
+    const el=document.createElement('div');
+    el.className=`seat ${s}`;
+    el.textContent=`${R[r]}${c+1}`;
+    if(s==='available'){
+      el.addEventListener('click',()=>{
+        grid.querySelectorAll('.seat.selected').forEach(x=>x.className='seat available');
+        el.className='seat selected';
+      });
+    }
+    grid.appendChild(el);
+  }
+}
+</script>
+</body>
+</html>

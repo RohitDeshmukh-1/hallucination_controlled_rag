@@ -1,2 +1,60 @@
+# Environment
 .env
 .env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Storage & Model Cache
+storage/uploads/*.pdf
+storage/index/*.index
+storage/index/*.pkl
+
+# HuggingFace / Torch model cache
+.cache/
+hub/
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+experiments/logs/*.log
+
+# Evaluation outputs
+evaluation/results/
+evaluation/reports/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Install logs
+install_log.txt

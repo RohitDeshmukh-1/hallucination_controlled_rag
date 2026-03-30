@@ -31,8 +31,10 @@ class Settings(BaseSettings):
     RERANKER_TOP_N: int = 5
 
     # Verification Thresholds
-    VERIFICATION_SIMILARITY_THRESHOLD: float = 0.35
-    VERIFICATION_UNSUPPORTED_RATIO: float = 0.6
+    # 0.55 is calibrated for all-MiniLM-L6-v2 cosine similarity;
+    # 0.35 was too lenient and allowed semantically distant claims through.
+    VERIFICATION_SIMILARITY_THRESHOLD: float = 0.55
+    VERIFICATION_UNSUPPORTED_RATIO: float = 0.5
 
     # Storage Paths
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
@@ -43,6 +45,11 @@ class Settings(BaseSettings):
     # Faiss Index Paths
     FAISS_INDEX_PATH: Path = INDEX_DIR / "faiss.index"
     FAISS_META_PATH: Path = INDEX_DIR / "chunks.pkl"
+
+    # Supabase Configuration (Optional for Cloud Storage)
+    SUPABASE_URL: Optional[str] = None
+    SUPABASE_KEY: Optional[str] = None
+    SUPABASE_BUCKET: str = "papers"
 
     # Optimization
     USE_GPU: bool = False

@@ -11,6 +11,7 @@ from pipeline.ingest_document import ingest_document
 from pipeline.query_pipeline import run_query_pipeline
 from api import dependencies
 from configs.settings import settings
+from utils.storage import storage_client
 
 logging.basicConfig(
     level=logging.INFO,
@@ -77,13 +78,14 @@ def upload_pdf(file: UploadFile = File(...)):
         logger.error("File save error: %s", e)
         raise HTTPException(status_code=500, detail="Failed to save file")
 
-    try:
+        # Optionally upload to cloud if configured
+        storage_client.upload_file(file_path, file_id)
+        
         encoder = dependencies.get_encoder()
         index = dependencies.get_index()
 
-        # Clear stale index data so new uploads always start fresh
-        index.clear()
-        logger.info("Index cleared before ingesting new document.")
+        # REMOVED: index.clear() call to allow multiple papers in one index
+        logger.info("Ingesting new document: %s", file.filename)
 
         doc_id = ingest_document(file_path, encoder, index)
     except Exception as e:
