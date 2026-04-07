@@ -1,0 +1,104 @@
+.context-panel {
+  background: #0f1420;
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  height: 100vh; overflow-y: auto;
+}
+
+.ctx-title {
+  padding: 16px; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.9px; text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Section */
+.ctx-section { border-bottom: 1px solid var(--border); }
+.ctx-section-header {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; background: none; border: none;
+  padding: 11px 14px;
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  cursor: pointer; font-family: var(--font);
+  text-align: left;
+  transition: color var(--transition);
+}
+.ctx-section-header:hover { color: var(--text); }
+.ctx-section-header span:nth-child(2) { flex: 1; }
+.ctx-icon { font-size: 12px; color: var(--violet); font-weight: 800; }
+.ctx-section-body { padding: 4px 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.ctx-empty { font-size: 12px; color: var(--text-dim); text-align: center; padding: 8px 4px; line-height: 1.5; }
+
+/* Evidence cards */
+.ev-card {
+  background: var(--surface-low);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 10px;
+  transition: border-color var(--transition), background var(--transition);
+}
+.ev-card:hover { border-color: rgba(99,102,241,0.25); background: var(--surface-mid); }
+
+.ev-card-header {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
+}
+.ev-badge {
+  background: var(--primary-glow); color: var(--violet);
+  font-size: 10px; font-weight: 800;
+  padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
+}
+.ev-doc { font-size: 11px; color: var(--text-muted); flex: 1; }
+.ev-pages { font-size: 10px; color: var(--text-dim); white-space: nowrap; }
+.ev-score {
+  font-size: 10px; color: var(--success);
+  background: var(--success-bg); padding: 1px 5px;
+  border-radius: 3px; white-space: nowrap;
+}
+
+.ev-text {
+  font-size: 12px; color: var(--text-muted); line-height: 1.6;
+  display: -webkit-box; -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.ev-text.expanded {
+  display: block; -webkit-line-clamp: unset;
+}
+.ev-expand {
+  background: none; border: none; color: var(--primary);
+  font-size: 11px; cursor: pointer; padding: 3px 0;
+  font-family: var(--font);
+}
+.ev-expand:hover { text-decoration: underline; }
+
+/* Verification block */
+.verification-block { display: flex; flex-direction: column; gap: 10px; }
+.veri-row { display: flex; justify-content: space-between; align-items: center; }
+.veri-label { font-size: 11px; color: var(--text-dim); }
+.veri-value { font-size: 12px; font-weight: 600; text-transform: capitalize; }
+.veri-metric { display: flex; flex-direction: column; gap: 4px; }
+.veri-metric-header {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--text-dim);
+}
+
+/* Pin cards */
+.ctx-pin-card {
+  background: var(--surface-low);
+  border: 1px solid rgba(99,102,241,0.15);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+.ctx-pin-text { font-size: 12px; color: var(--text); line-height: 1.5; }
+.ctx-pin-meta {
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 6px;
+  margin-top: 5px;
+}
+.ctx-pin-q { font-size: 10px; color: var(--text-dim); font-style: italic; flex: 1; }
+.pin-remove-btn {
+  background: none; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 16px; line-height: 1;
+  padding: 0 2px; border-radius: 3px;
+}
+.pin-remove-btn:hover { color: var(--error); background: var(--error-bg); }
