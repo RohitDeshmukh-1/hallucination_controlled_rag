@@ -1,0 +1,175 @@
+/* ═══════════════════════════════════════════════════
+   ResearchMind — Global Design System
+   Obsidian Scholar palette + Inter typography
+═══════════════════════════════════════════════════ */
+
+:root {
+  --bg:              #0c1322;
+  --surface:         #111827;
+  --surface-low:     #141b2b;
+  --surface-mid:     #191f2f;
+  --surface-high:    #232a3a;
+  --surface-top:     #2e3545;
+  --border:          rgba(99,102,241,0.12);
+  --primary:         #6366f1;
+  --primary-dim:     #4f46e5;
+  --primary-glow:    rgba(99,102,241,0.18);
+  --violet:          #818cf8;
+  --text:            #dce2f7;
+  --text-muted:      #9ca3af;
+  --text-dim:        #6b7280;
+  --success:         #10b981;
+  --success-bg:      rgba(16,185,129,0.12);
+  --warning:         #f59e0b;
+  --warning-bg:      rgba(245,158,11,0.12);
+  --error:           #ef4444;
+  --error-bg:        rgba(239,68,68,0.12);
+  --sidebar-w:       280px;
+  --context-w:       320px;
+  --radius:          10px;
+  --radius-sm:       6px;
+  --radius-full:     9999px;
+  --transition:      200ms ease;
+  --shadow-glow:     0 0 32px rgba(99,102,241,0.08);
+  --font:            'Inter', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { height: 100%; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root { height: 100vh; display: flex; flex-direction: column; }
+
+/* ── Scrollbars ──────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface-top); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-dim); }
+
+/* ── Utility ─────────────────────────────────── */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Buttons ─────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 500; font-family: var(--font);
+  cursor: pointer; border: none; transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dim));
+  color: #fff;
+  box-shadow: 0 0 16px var(--primary-glow);
+}
+.btn-primary:hover { filter: brightness(1.12); box-shadow: 0 0 24px var(--primary-glow); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+.btn-ghost {
+  background: transparent; color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: var(--surface-high); color: var(--text); }
+.btn-danger {
+  background: var(--error-bg); color: var(--error); border: 1px solid transparent;
+}
+.btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+/* ── Badges ──────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: var(--radius-full);
+  font-size: 11px; font-weight: 600; letter-spacing: 0.4px;
+}
+.badge-success { background: var(--success-bg); color: var(--success); }
+.badge-warning { background: var(--warning-bg); color: var(--warning); }
+.badge-error   { background: var(--error-bg);   color: var(--error);   }
+.badge-muted   { background: var(--surface-high); color: var(--text-muted); }
+.badge-primary { background: var(--primary-glow); color: var(--violet); }
+
+/* ── Cards ───────────────────────────────────── */
+.card {
+  background: var(--surface-mid);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  transition: background var(--transition), border-color var(--transition);
+}
+.card:hover { background: var(--surface-high); border-color: rgba(99,102,241,0.2); }
+
+/* ── Progress bar ────────────────────────────── */
+.progress-bar {
+  height: 4px; border-radius: 2px;
+  background: var(--surface-top);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--violet));
+  transition: width 0.4s ease;
+}
+
+/* ── Pulse animation (AI processing) ─────────── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--primary-glow); }
+  50%       { box-shadow: 0 0 16px 4px var(--primary-glow); }
+}
+.pulse { animation: pulse-glow 1.8s ease-in-out infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 16px; height: 16px; border: 2px solid var(--surface-top);
+  border-top-color: var(--primary); border-radius: 50%;
+  animation: spin 0.7s linear infinite; display: inline-block;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 0.25s ease both; }
+
+/* ── Input ───────────────────────────────────── */
+.input-field {
+  background: var(--surface-low);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  padding: 10px 14px;
+  outline: none;
+  width: 100%;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.input-field::placeholder { color: var(--text-dim); }
+.input-field:focus {
+  border-color: rgba(99,102,241,0.45);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.08);
+}
+
+/* ── Tooltip ─────────────────────────────────── */
+[data-tooltip] { position: relative; }
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%); white-space: nowrap;
+  background: var(--surface-top); color: var(--text);
+  font-size: 11px; padding: 4px 8px; border-radius: 4px;
+  pointer-events: none; opacity: 0; transition: opacity 0.15s;
+  z-index: 100;
+}
+[data-tooltip]:hover::after { opacity: 1; }
