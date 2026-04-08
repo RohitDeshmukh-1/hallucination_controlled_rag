@@ -15,10 +15,18 @@ from api import dependencies
 from configs.settings import settings
 from utils.storage import storage_client
 
+import gc
+import os
+
+# Force single thread for torch to save CPU/memory overhead on small instances
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
 )
+gc.collect()
 logger = logging.getLogger(__name__)
 
 # In-memory session store: session_id -> ConversationMemory
@@ -121,6 +129,9 @@ def upload_pdf(file: UploadFile = File(...), session_id: str = "default"):
     # Register doc into session memory
     session = _get_session(session_id)
     session.register_document(doc_id, file.filename, index.chunk_count)
+    
+    # Explicitly clear memory after heavy operation
+    gc.collect()
 
     return {
         "status": "indexed",
