@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     
     # Reranking Configuration
     RERANKER_MODEL_NAME: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-    RERANKER_MAX_PASSAGES: int = 20
+    RERANKER_MAX_PASSAGES: int = 5
     RERANKER_TOP_N: int = 5
 
     # Verification Thresholds
