@@ -33,12 +33,8 @@ def _get_session(session_id: str) -> ConversationMemory:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Application starting up - pre-loading models...")
-    dependencies.get_encoder()
-    dependencies.get_index()
-    dependencies.get_reranker()
-    dependencies.get_llm_client()
-    logger.info("All models loaded.")
+    # Models will load lazily on first request to avoid deployment timeouts
+    logger.info(f"ResearchMind RAG system starting on {settings.PROJECT_NAME}")
     yield
     logger.info("Application shutting down.")
 
