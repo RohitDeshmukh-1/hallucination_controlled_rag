@@ -22,10 +22,11 @@ COPY . .
 # Create required directories
 RUN mkdir -p storage/uploads storage/index
 
-# Health check
+# Health check (matches the dynamic port or default 8000)
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=60s \
- CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
+  CMD python -c "import urllib.request; import os; port=os.getenv('PORT', '8000'); urllib.request.urlopen(f'http://localhost:{port}/health')" || exit 1
 
 EXPOSE 8000
 
-CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use shell form to allow environment variable expansion for Render/Cloud platforms
+CMD uvicorn api.app:app --host 0.0.0.0 --port ${PORT:-8000}
