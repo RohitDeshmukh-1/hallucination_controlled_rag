@@ -59,6 +59,16 @@ app.add_middleware(
 settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
+@app.get("/")
+def root():
+    return {
+        "message": "Welcome to ResearchMind RAG API",
+        "version": "2.0.0",
+        "status": "online",
+        "docs": "/docs"
+    }
+
+
 # -- Request / Response Models ------------------------------------------------
 
 class QuestionRequest(BaseModel):
