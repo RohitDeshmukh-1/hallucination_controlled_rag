@@ -14,10 +14,18 @@ build/
 eggs/
 *.egg
 
-# Virtual Environment
+# Virtual Environments
 .venv/
 venv/
 ENV/
+ragenv/
+*env/
+*venv/
+bin/
+lib/
+share/
+include/
+python*/
 
 # IDE
 .vscode/

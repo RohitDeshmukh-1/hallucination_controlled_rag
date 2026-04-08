@@ -1,4 +1,5 @@
 import logging
+from typing import List, Optional, Dict, Any
 from retrieval.faiss_index import FaissIndex
 from retrieval.cross_encoder import CrossEncoderReranker
 from embeddings.encoder import EmbeddingEncoder
@@ -6,6 +7,7 @@ from generation.llm_client import LLMClient
 from generation.prompt_builder import PromptBuilder
 from generation.answer_verifier import AnswerVerifier
 from generation.citation_extractor import CitationExtractor
+from configs.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +27,9 @@ def run_query_pipeline(
     reranker: CrossEncoderReranker,
     llm: LLMClient,
     enable_nli: bool = False,
+    conversation_context: str = "",
+    pinned_context: str = "",
+    doc_ids: Optional[List[str]] = None,
 ) -> dict:
     """
     Run the full query pipeline: retrieve → rerank → generate → verify → cite.
@@ -45,7 +50,11 @@ def run_query_pipeline(
         }
 
     query_embedding = encoder.embed_query(question)
-    retrieved = index.search(query_embedding, top_k=20)
+    retrieved = index.search(
+        query_embedding, 
+        top_k=settings.RERANKER_MAX_PASSAGES, 
+        doc_ids=doc_ids
+    )
     logger.info("Retrieved %d chunks for query: '%s'", len(retrieved), question[:80])
 
     if not retrieved:
@@ -69,7 +78,12 @@ def run_query_pipeline(
             "citations": [],
         }
 
-    prompt = PromptBuilder().build(question, evidence)
+    prompt = PromptBuilder().build(
+        question, 
+        evidence, 
+        conversation_context=conversation_context,
+        pinned_context=pinned_context
+    )
 
     try:
         answer = llm.generate(prompt)

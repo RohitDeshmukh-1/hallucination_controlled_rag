@@ -2,11 +2,11 @@
 Comprehensive Evaluation Suite for Hallucination-Controlled Academic RAG.
 
 Measures:
-  1. Retrieval quality   — Recall@K, MRR, NDCG@K
-  2. Hallucination rate  — sentence-level unsupported claim rate
-  3. Citation accuracy   — coverage, validity, groundedness
-  4. Answer quality      — faithfulness, relevance, completeness
-  5. Latency profiling   — per-stage timing breakdown
+  1. Retrieval quality   - Recall@K, MRR, NDCG@K
+  2. Hallucination rate  - sentence-level unsupported claim rate
+  3. Citation accuracy   - coverage, validity, groundedness
+  4. Answer quality      - faithfulness, relevance, completeness
+  5. Latency profiling   - per-stage timing breakdown
 
 Usage:
     python -m evaluation.run_evaluation
@@ -38,9 +38,9 @@ from evaluation.faithfulness_metrics import FaithfulnessMetrics
 
 logger = logging.getLogger(__name__)
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Built-in evaluation questions (used when no external benchmark is provided)
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 DEFAULT_EVAL_QUESTIONS = [
     "What is the main contribution of this paper?",
     "What methodology does this paper use?",
@@ -64,9 +64,9 @@ ADVERSARIAL_QUESTIONS = [
 ]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Metric computation helpers
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def compute_retrieval_metrics(
     retrieved_chunks: List[Dict],
@@ -79,13 +79,13 @@ def compute_retrieval_metrics(
     if not relevant_doc_id or not retrieved_chunks:
         return metrics
 
-    # Recall@K — did we find the right doc within top-K?
+    # Recall@K - did we find the right doc within top-K?
     for k in k_values:
         top_k = retrieved_chunks[:k]
         hit = any(c.get("doc_id") == relevant_doc_id for c in top_k)
         metrics[f"recall@{k}"] = 1.0 if hit else 0.0
 
-    # MRR — reciprocal rank of first relevant result
+    # MRR - reciprocal rank of first relevant result
     for i, chunk in enumerate(retrieved_chunks):
         if chunk.get("doc_id") == relevant_doc_id:
             metrics["mrr"] = 1.0 / (i + 1)
@@ -106,9 +106,9 @@ def compute_citation_metrics(citation_result: Dict) -> Dict[str, float]:
     }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # Main evaluation runner
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 class EvaluationRunner:
     """Orchestrates end-to-end evaluation of the RAG pipeline."""
@@ -287,9 +287,9 @@ class EvaluationRunner:
         }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 # CLI entry point
-# ─────────────────────────────────────────────────────────────────────────────
+# 
 
 def main():
     logging.basicConfig(
@@ -310,38 +310,38 @@ def main():
 
     # Print summary
     print("\n" + "=" * 70)
-    print("EVALUATION REPORT — Hallucination-Controlled Academic RAG")
+    print("EVALUATION REPORT - Hallucination-Controlled Academic RAG")
     print("=" * 70)
 
     if "error" in report:
-        print(f"\n❌ {report['error']}")
+        print(f"\n {report['error']}")
         return
 
     s = report["summary"]
     print(f"\nQuestions: {s['total_questions']} ({s['normal_questions']} normal + {s['adversarial_questions']} adversarial)")
 
-    print("\n📊 Faithfulness Metrics:")
+    print("\n Faithfulness Metrics:")
     for k, v in report.get("faithfulness", {}).items():
         print(f"  {k:30s}: {v:.4f}")
 
-    print("\n📈 Verdict Distribution:")
+    print("\n Verdict Distribution:")
     for k, v in report["verdict_distribution"].items():
-        bar = "█" * int(v * 40)
+        bar = "" * int(v * 40)
         print(f"  {k:25s}: {v:.1%} {bar}")
 
-    print(f"\n🛡️ Adversarial Abstention Rate: {report['adversarial_abstention_rate']:.1%}")
-    print(f"📊 Avg Confidence:              {report['avg_confidence']:.3f}")
-    print(f"📊 Avg Support Ratio:           {report['avg_support_ratio']:.3f}")
-    print(f"📊 Avg Citation Coverage:       {report['avg_citation_coverage']:.1%}")
+    print(f"\n Adversarial Abstention Rate: {report['adversarial_abstention_rate']:.1%}")
+    print(f" Avg Confidence:              {report['avg_confidence']:.3f}")
+    print(f" Avg Support Ratio:           {report['avg_support_ratio']:.3f}")
+    print(f" Avg Citation Coverage:       {report['avg_citation_coverage']:.1%}")
 
     lat = report["latency"]
-    print(f"\n⏱️  Avg Total Latency:          {lat['avg_total_ms']:.0f} ms")
-    print(f"⏱️  P95 Total Latency:          {lat['p95_total_ms']:.0f} ms")
+    print(f"\n  Avg Total Latency:          {lat['avg_total_ms']:.0f} ms")
+    print(f"  P95 Total Latency:          {lat['p95_total_ms']:.0f} ms")
     print("  Per-stage breakdown:")
     for stage, ms in lat["per_stage_avg_ms"].items():
         print(f"    {stage:25s}: {ms:.0f} ms")
 
-    print(f"\n✅ Full report saved to: {output_file.resolve()}")
+    print(f"\n Full report saved to: {output_file.resolve()}")
 
 
 if __name__ == "__main__":

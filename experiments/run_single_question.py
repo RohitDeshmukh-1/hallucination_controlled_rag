@@ -65,7 +65,7 @@ def main():
     if verification.get("unsupported_sentences"):
         print("\nUNSUPPORTED SENTENCES:")
         for s in verification["unsupported_sentences"]:
-            print(f"  • {s}")
+            print(f"   {s}")
 
     if citation_result["inline_citations"]:
         print("\nCITATIONS:")
