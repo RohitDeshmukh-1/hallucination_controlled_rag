@@ -24,6 +24,14 @@ class LLMClient:
             api_key=self.api_key,
             base_url=self.base_url,
         )
+        
+        # Enable LangSmith tracing if installed
+        try:
+            from langsmith import wrappers
+            self.client = wrappers.wrap_openai(self.client)
+            logger.info("LangSmith tracing enabled for LLMClient.")
+        except ImportError:
+            logger.info("LangSmith not installed — skipping instrumentation.")
 
     def generate(self, prompt: dict) -> str:
         """Generate an answer strictly grounded in the provided prompt.

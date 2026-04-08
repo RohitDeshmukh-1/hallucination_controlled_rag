@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 class PromptBuilder:
@@ -23,40 +23,38 @@ class PromptBuilder:
         self.max_evidence_chunks = max_evidence_chunks
 
     def build(
-        self,
-        question: str,
+        self, 
+        question: str, 
         retrieved_chunks: List[Dict],
+        conversation_context: str = "",
+        pinned_context: str = "",
     ) -> Dict[str, str]:
         """
-        Build a citation-aware prompt.
-
-        Parameters
-        ----------
-        question : str
-            User question.
-        retrieved_chunks : List[Dict]
-            Evidence chunks after cross-encoder re-ranking.
-
-        Returns
-        -------
-        Dict[str, str]
-            Dictionary with 'system' and 'user' prompt fields.
+        Build a citation-aware prompt with optional session memory.
         """
-
         system_prompt = self._system_instruction()
         evidence_block = self._format_evidence(retrieved_chunks)
 
         user_prompt = (
             "You are provided with evidence excerpts from academic documents.\n\n"
+        )
+        
+        if pinned_context:
+            user_prompt += f"{pinned_context}\n\n"
+            
+        if conversation_context:
+            user_prompt += f"{conversation_context}\n\n"
+
+        user_prompt += (
             "Evidence:\n"
             f"{evidence_block}\n\n"
             "Question:\n"
             f"{question}\n\n"
             "Instructions:\n"
-            "- Answer using ONLY the evidence above. You may make reasonable "
-            "inferences that follow directly from the evidence.\n"
+            "- Answer using ONLY the evidence above.\n"
             "- Factual claims MUST end with citations in the form [E1], [E2], etc.\n"
-            "- Use only citation identifiers that appear in the evidence.\n"
+            "- Use ONLY citation identifiers that appear in the evidence.\n"
+
             "- Connecting phrases and logical transitions do not require citations.\n"
             "- If the evidence provides partial information, answer what you can "
             "and note any limitations.\n"

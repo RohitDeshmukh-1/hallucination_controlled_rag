@@ -26,7 +26,7 @@ def _get_nli_model():
     global _nli_model
     if _nli_model is None:
         from sentence_transformers import CrossEncoder
-        logger.info("Loading NLI model: cross-encoder/nli-deberta-v3-small …")
+        logger.info("Loading NLI model: cross-encoder/nli-deberta-v3-small ...")
         _nli_model = CrossEncoder(
             "cross-encoder/nli-deberta-v3-small",
             max_length=512,
@@ -36,7 +36,7 @@ def _get_nli_model():
 
 
 # Label mapping for the nli-deberta-v3 models:
-#   0 → contradiction,  1 → entailment,  2 → neutral
+#   0  contradiction,  1  entailment,  2  neutral
 LABEL_MAP = {0: "contradiction", 1: "entailment", 2: "neutral"}
 
 
@@ -83,10 +83,10 @@ class NLIVerifier:
         Returns
         -------
         Dict with keys:
-            verdict : str — "entailed", "partially_entailed", "contradicted"
-            entailment_ratio : float — fraction of sentences entailed
+            verdict : str - "entailed", "partially_entailed", "contradicted"
+            entailment_ratio : float - fraction of sentences entailed
             avg_entailment_score : float
-            per_sentence : List[Dict] — per-sentence breakdown
+            per_sentence : List[Dict] - per-sentence breakdown
         """
         model = _get_nli_model()
 

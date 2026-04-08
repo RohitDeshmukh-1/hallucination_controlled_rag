@@ -31,7 +31,7 @@ class CitationRenderer:
         """
         Render citations in Nature superscript style.
         """
-        return self._replace(text, prefix="⁽", suffix="⁾")
+        return self._replace(text, prefix="", suffix="")
 
     def render_apa(self, text: str) -> str:
         """

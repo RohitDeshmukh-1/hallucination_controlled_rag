@@ -41,6 +41,8 @@ httpx>=0.26.0,<0.28.0
 # Logging & Monitoring
 structlog>=24.1.0,<25.0.0
 rich>=13.7.0,<14.0.0
+langsmith>=0.1.0
+
 
 # Cloud Storage
 supabase>=2.3.0

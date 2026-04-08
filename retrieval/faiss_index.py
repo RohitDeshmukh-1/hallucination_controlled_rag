@@ -2,7 +2,7 @@ import faiss
 import numpy as np
 import pickle
 import logging
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional
 from pathlib import Path
 from configs.settings import settings
 
@@ -60,21 +60,42 @@ class FaissIndex:
 
         logger.info("Added %d chunks to index (total: %d)", len(chunks), self.chunk_count)
 
-    def search(self, query_embedding: np.ndarray, top_k: int) -> List[Dict]:
-        """Search the index for the top-k most similar chunks."""
+    def search(
+        self, 
+        query_embedding: np.ndarray, 
+        top_k: int, 
+        doc_ids: Optional[List[str]] = None
+    ) -> List[Dict]:
+        """
+        Search the index for the top-k most similar chunks.
+        Optional filtering by document IDs.
+        """
         if self.index.ntotal == 0:
             return []
 
+        # If filtering is active, we fetch more items to ensure we get 
+        # enough valid results after filtering.
+        fetch_k = top_k * 3 if doc_ids else top_k
+        
         scores, indices = self.index.search(
-            query_embedding.reshape(1, -1).astype("float32"), top_k
+            query_embedding.reshape(1, -1).astype("float32"), fetch_k
         )
 
         results = []
         for score, idx in zip(scores[0], indices[0]):
             if idx >= 0 and idx < len(self.chunks):
-                result = dict(self.chunks[idx])
+                chunk = self.chunks[idx]
+                
+                # Filter by doc_id if provided
+                if doc_ids and chunk.get("doc_id") not in doc_ids:
+                    continue
+                    
+                result = dict(chunk)
                 result["similarity_score"] = float(score)
                 results.append(result)
+                
+                if len(results) >= top_k:
+                    break
 
         return results
 
