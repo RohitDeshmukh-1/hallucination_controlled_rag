@@ -1,9 +1,9 @@
 ---
 title: Hallucination Controlled RAG
 emoji: "🧠"
-colorFrom: cyan
-colorTo: emerald
-short_description: Hallucination-controlled scientific RAG with verifiable citations and memory-aware QA.
+colorFrom: blue
+colorTo: indigo
+short_description: Scientific RAG with verifiable citations and memory.
 sdk: docker
 app_port: 7860
 pinned: false
