@@ -1,3 +1,13 @@
+---
+title: Hallucination Controlled RAG
+emoji: "📄"
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 # Hallucination Controlled RAG on Scientific Documents
 
 
@@ -226,6 +236,51 @@ python -m evaluation.run_evaluation
 
 ## Deployment & CI/CD
 The project is configured for automated delivery via **GitHub Actions** and containerized deployment via **Docker**.
+
+### Hugging Face Spaces (Backend API Only)
+
+Deploy this repository to Hugging Face Spaces as a Docker-based FastAPI backend, then point your Vercel frontend to the Space URL.
+
+1. Create the Space
+	- Open Hugging Face -> New Space.
+	- Choose SDK: **Docker**.
+	- Name it (example: `hallucination-controlled-rag-api`).
+
+2. Push this repo to your Space
+	- From this repository root:
+
+	```bash
+	git remote add hf https://huggingface.co/spaces/<hf_username>/<space_name>
+	git push hf main
+	```
+
+	- If `hf` remote already exists, run:
+
+	```bash
+	git push hf main --force-with-lease
+	```
+
+3. Add Space secrets
+	- In Space -> **Settings** -> **Variables and secrets**, add:
+	  - `LLM_API_KEY` (required)
+	  - `LLM_API_BASE` (optional, default `https://api.groq.com/openai/v1`)
+	  - `LLM_MODEL` (optional, default `llama3-70b-8192`)
+	  - `LANGCHAIN_API_KEY` (optional)
+	  - `LANGCHAIN_TRACING_V2` (optional, `true` or `false`)
+
+4. Wait for build and verify backend health
+	- After build succeeds, open:
+	  - `https://<space_name>.hf.space/health`
+	  - `https://<space_name>.hf.space/docs`
+
+5. Wire your Vercel frontend to this backend
+	- In Vercel project settings, set environment variable:
+	  - `VITE_API_URL=https://<space_name>.hf.space`
+	- Redeploy Vercel.
+
+Notes:
+- The backend starts from the root `Dockerfile` using `uvicorn api.app:app --host 0.0.0.0 --port ${PORT:-8000}`.
+- README frontmatter already sets `sdk: docker` and `app_port: 8000` for Spaces.
 
 ### 1. Docker Production Run
 ```bash

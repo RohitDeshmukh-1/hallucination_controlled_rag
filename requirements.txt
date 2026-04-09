@@ -30,8 +30,7 @@ python-multipart>=0.0.9
 pydantic>=2.5.0
 pydantic-settings>=2.1.0
 
-# Frontend (Streamlit)
-streamlit>=1.32.0
+# Frontend / Client Utilities
 requests>=2.31.0
 
 # Production Deployment
