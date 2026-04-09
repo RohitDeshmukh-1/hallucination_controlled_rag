@@ -1,10 +1,11 @@
 ---
 title: Hallucination Controlled RAG
-emoji: "📄"
-colorFrom: blue
-colorTo: indigo
+emoji: "🧠"
+colorFrom: cyan
+colorTo: emerald
+short_description: Hallucination-controlled scientific RAG with verifiable citations and memory-aware QA.
 sdk: docker
-app_port: 8000
+app_port: 7860
 pinned: false
 ---
 
@@ -241,6 +242,8 @@ The project is configured for automated delivery via **GitHub Actions** and cont
 
 Deploy this repository to Hugging Face Spaces as a Docker-based FastAPI backend, then point your Vercel frontend to the Space URL.
 
+Official Docker Spaces docs: https://huggingface.co/docs/hub/spaces-sdks-docker
+
 1. Create the Space
 	- Open Hugging Face -> New Space.
 	- Choose SDK: **Docker**.
@@ -279,8 +282,8 @@ Deploy this repository to Hugging Face Spaces as a Docker-based FastAPI backend,
 	- Redeploy Vercel.
 
 Notes:
-- The backend starts from the root `Dockerfile` using `uvicorn api.app:app --host 0.0.0.0 --port ${PORT:-8000}`.
-- README frontmatter already sets `sdk: docker` and `app_port: 8000` for Spaces.
+- The backend starts from the root `Dockerfile` using `uvicorn api.app:app --host 0.0.0.0 --port ${PORT:-7860}`.
+- README frontmatter sets `sdk: docker` and `app_port: 7860` for Spaces.
 
 ### 1. Docker Production Run
 ```bash
