@@ -1,302 +1,168 @@
----
-title: Hallucination Controlled RAG
-emoji: "🧠"
-colorFrom: blue
-colorTo: indigo
-short_description: Scientific RAG with verifiable citations and memory.
-sdk: docker
-app_port: 7860
-pinned: false
----
+# Hallucination-Controlled RAG for Scientific Documents
 
-# Hallucination Controlled RAG on Scientific Documents
+> **Live Demo → [hallucination-controlled-rag.vercel.app](https://hallucination-controlled-rag.vercel.app/)**
 
-
-
-A premium AI research platform with hallucination control, multi-turn memory, and verifiable citation tracking.
-
-
+A production-grade Retrieval-Augmented Generation system engineered for academic and scientific research — where a hallucinated citation isn't just wrong, it's harmful. This project goes beyond standard RAG by building a **multi-stage verification pipeline** that cross-validates every generated sentence against retrieved evidence before a single word reaches the user.
 
 ---
 
+## The Problem with Standard RAG
 
+Most RAG systems retrieve documents and pass them to an LLM with a vague instruction to "only use the context." The LLM still hallucinates — it interpolates, confabulates sources, and blends retrieved facts with parametric memory. In scientific workflows, this is unacceptable.
 
-## Advanced RAG Architecture
-
-
-
-ResearchMind employs a sophisticated Retrieval-Augmented Generation (RAG) pipeline designed for academic and scientific discovery where precision is paramount.
-
-
-
-### Hallucination-Controlled RAG Pipeline
-
-- **Verifiable Citations**: Each factual claim is automatically mapped to specific document pages with [E1], [E2] markers.
-
-- **Evidence-Only Grounding**: Responses are strictly constrained to retrieved context, preventing "world knowledge" hallucinations from the LLM.
-
-- **Sentence-Level Verification**: Cross-Encoder and Natural Language Inference (NLI) models verify every sentence of the generated response before delivery.
-
-- **Conversation Memory**: Multi-turn history awareness and "Memory Pins" maintain key facts across the entire research session.
-
-- **Confidence Scoring**: Real-time metrics for faithfulness, support ratio, and citation coverage provide transparency into the model's reasoning.
-
-
-
-### Tech Stack
-
-- **Frontend**: React 19 + Vite (Modern Dark UI)
-
-- **Backend**: FastAPI (Python 3.10+)
-
-- **Pipeline**: FAISS (Dense Retrieval) + Cross-Encoder (Reranking) + Gemini/OpenAI (Inference)
-
-- **Monitoring**: LangSmith + StructLog
-
-
+**This project treats hallucination as an engineering problem, not a prompting problem.**
 
 ---
 
+## Architecture
 
-
-## Core Features
-
-
-
-| Feature | Description |
-
-|---------|-------------|
-
-| **Design System** | Professional three-column layout featuring Library, Chat, and Context Panels for an efficient research workflow. |
-
-| **Memory Pins** | Pin specific insights from generated answers to keep them in permanent context for future questions within the session. |
-
-| **Contextual Rewrites** | Automatically expands ambiguous queries using conversation history to ensure accurate retrieval. |
-
-| **NLI Safety Gates** | Integrated Natural Language Inference for rigorous entailment checking of all claims. |
-
-| **Global Library** | Track all indexed papers and session history in a unified research workspace. |
-
-
-
----
-
-
-
-## Getting Started
-
-
-
-### 1. Requirements
-
-- Python 3.10+
-
-- Node.js 20+
-
-- Docker (optional)
-
-
-
-### 2. Quick Setup (Local)
-
-1. **Clone and Install Backend**:
-
- ```bash
-
- pip install -r requirements.txt
-
- ```
-
-2. **Install Frontend**:
-
- ```bash
-
- cd webapp
-
- npm install
-
- ```
-
-3. **Configure Environment**:
-
- Create a `.env` file with your `LLM_API_KEY`.
-
-
-
-### 3. Running the Application
-
-**Development Mode**
-
-- Backend: `uvicorn api.app:app --reload --port 8000`
-
-- Frontend: `cd webapp && npm run dev`
-
-
-
-**Docker Compose**
-
-```bash
-
-docker-compose up --build
+The system is a five-stage pipeline where each stage acts as a filter:
 
 ```
-
-
-
----
-
-
-
-## Pipeline Architecture
-
-
-
-The following diagram illustrates the end-to-end flow of data and verification within the ResearchMind system.
-
-
-
-```mermaid
-
-graph TD
-
- subgraph Ingestion
-
- A[PDF Upload] --> B[Text Extraction & Cleaning]
-
- B --> C[Semantic Chunking]
-
- C --> D[FAISS Dense Index]
-
- end
-
-
-
- subgraph Retrieval
-
- E[User Question] --> F[Contextual Query Rewriting]
-
- F --> G[Dense Vector Search]
-
- G --> H[Cross-Encoder Reranking]
-
- end
-
-
-
- subgraph Generation
-
- H --> I[Prompt Construction]
-
- J[Memory Pins] --> I
-
- K[Conversation History] --> I
-
- I --> L[LLM Inference]
-
- end
-
-
-
- subgraph Verification
-
- L --> M[Sentence-Level NLI Verification]
-
- L --> N[Citation Mapping & Extraction]
-
- M --> O[Faithfulness Scoring]
-
- N --> O
-
- end
-
-
-
- O --> P[Final Verified Response]
-
+PDF Upload
+   │
+   ▼
+[Ingestion] ──── Text Extraction → Semantic Chunking → FAISS Dense Index
+                                                              │
+User Question                                                 │
+   │                                                          ▼
+   ▼                                                   [Retrieval]
+Contextual Query Rewriting ──────────────────────► Dense Vector Search
+(expands ambiguous queries using conversation history)        │
+                                                              ▼
+                                                     Cross-Encoder Reranking
+                                                              │
+                                                              ▼
+                                                    [Generation]
+                                        Prompt = Retrieved Chunks
+                                                  + Memory Pins
+                                                  + Conversation History
+                                                              │
+                                                              ▼
+                                                       LLM Inference
+                                                              │
+                                                              ▼
+                                                    [Verification]
+                                          Sentence-Level NLI Entailment Check
+                                          Citation Mapping → [E1], [E2] markers
+                                          Faithfulness Score + Support Ratio
+                                                              │
+                                                              ▼
+                                                 Verified Response Delivered
 ```
 
+### Why Each Stage Matters
 
+| Stage | What it solves |
+|---|---|
+| **Semantic Chunking** | Avoids splitting mid-argument; preserves reasoning units for better retrieval precision |
+| **Contextual Query Rewriting** | Resolves pronoun references and follow-up questions before vector search — a common silent failure mode in multi-turn RAG |
+| **Cross-Encoder Reranking** | Bi-encoder retrieval optimizes for similarity, not relevance. Cross-encoders compare query↔passage jointly for higher precision |
+| **NLI Entailment Gate** | Each generated sentence is independently checked: does the retrieved context *entail* this claim? Sentences that fail are flagged or suppressed |
+| **Citation Mapping** | Every claim is anchored to a specific document page — enabling external auditability, not just LLM confidence scores |
 
 ---
 
+## Key Engineering Decisions
+
+**Evidence-Only Grounding** — The prompt architecture is designed to suppress parametric memory. The LLM is constrained to reason only over retrieved context, not its pretraining knowledge. This is enforced structurally in prompt construction, not via instruction alone.
+
+**Sentence-Level Verification, Not Response-Level** — Most hallucination-detection approaches score a response as a whole. This system checks every sentence independently against the evidence pool. A mostly-correct response with one hallucinated claim still gets that claim flagged.
+
+**Memory Pins** — Research sessions are iterative. Users can pin verified insights from prior answers into persistent session context, preventing the model from contradicting established facts in follow-up queries.
+
+**Confidence Metrics Exposed to User** — Faithfulness score, support ratio, and citation coverage are surfaced in the UI. This shifts the system from black-box inference to transparent, auditable reasoning — critical for scientific workflows.
 
 ---
 
-## Testing & Evaluation
-Run integration tests for memory and context:
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Frontend** | React 19 + Vite |
+| **Backend** | FastAPI (Python 3.10+) |
+| **Vector Store** | FAISS (dense retrieval) |
+| **Reranking** | Cross-Encoder (sentence-transformers) |
+| **NLI Verification** | Hugging Face NLI models |
+| **LLM Inference** | Gemini / OpenAI (configurable) |
+| **Observability** | LangSmith + StructLog |
+| **CI/CD** | GitHub Actions + Docker |
+
+---
+
+## Evaluation
+
+The pipeline includes a faithfulness evaluation suite that measures outputs against ground-truth evidence, not just LLM self-assessment:
+
 ```bash
+# Run integration tests for memory and multi-turn context
 pytest tests/test_memory_integration.py -v
-```
 
-For full pipeline faithfulness evaluation:
-```bash
+# Full pipeline faithfulness evaluation
 python -m evaluation.run_evaluation
 ```
 
+Metrics tracked:
+- **Faithfulness Score** — fraction of generated claims entailed by retrieved context
+- **Support Ratio** — proportion of sentences with at least one valid citation anchor
+- **Citation Coverage** — percentage of claims mapped to specific document pages
+
 ---
 
-## Deployment & CI/CD
-The project is configured for automated delivery via **GitHub Actions** and containerized deployment via **Docker**.
+## Running Locally
 
-### Hugging Face Spaces (Backend API Only)
+**Prerequisites:** Python 3.10+, Node.js 20+
 
-Deploy this repository to Hugging Face Spaces as a Docker-based FastAPI backend, then point your Vercel frontend to the Space URL.
-
-Official Docker Spaces docs: https://huggingface.co/docs/hub/spaces-sdks-docker
-
-1. Create the Space
-	- Open Hugging Face -> New Space.
-	- Choose SDK: **Docker**.
-	- Name it (example: `hallucination-controlled-rag-api`).
-
-2. Push this repo to your Space
-	- From this repository root:
-
-	```bash
-	git remote add hf https://huggingface.co/spaces/<hf_username>/<space_name>
-	git push hf main
-	```
-
-	- If `hf` remote already exists, run:
-
-	```bash
-	git push hf main --force-with-lease
-	```
-
-3. Add Space secrets
-	- In Space -> **Settings** -> **Variables and secrets**, add:
-	  - `LLM_API_KEY` (required)
-	  - `LLM_API_BASE` (optional, default `https://api.groq.com/openai/v1`)
-	  - `LLM_MODEL` (optional, default `llama3-70b-8192`)
-	  - `LANGCHAIN_API_KEY` (optional)
-	  - `LANGCHAIN_TRACING_V2` (optional, `true` or `false`)
-
-4. Wait for build and verify backend health
-	- After build succeeds, open:
-	  - `https://<space_name>.hf.space/health`
-	  - `https://<space_name>.hf.space/docs`
-
-5. Wire your Vercel frontend to this backend
-	- In Vercel project settings, set environment variable:
-	  - `VITE_API_URL=https://<space_name>.hf.space`
-	- Redeploy Vercel.
-
-Notes:
-- The backend starts from the root `Dockerfile` using `uvicorn api.app:app --host 0.0.0.0 --port ${PORT:-7860}`.
-- README frontmatter sets `sdk: docker` and `app_port: 7860` for Spaces.
-
-### 1. Docker Production Run
 ```bash
-docker-compose up -d --build
+# Clone and install backend dependencies
+pip install -r requirements.txt
+
+# Install frontend
+cd webapp && npm install
+
+# Configure environment
+echo "LLM_API_KEY=your_key_here" > .env
+
+# Start backend
+uvicorn api.app:app --reload --port 8000
+
+# Start frontend (new terminal)
+cd webapp && npm run dev
 ```
 
-### 2. CI/CD Pipeline
-- **Linting**: Black formatting & Flake8 syntax checking.
-- **Testing**: Automated `pytest` execution on every push.
-- **Image Safety**: Multi-stage Docker build validation for zero-failure deployments.
+**Or with Docker:**
+```bash
+docker-compose up --build
+```
 
 ---
 
-## Support
-Designed for academic research and high-precision scientific discovery.
+## Deployment
 
+The system is split across two hosting environments:
+
+**Backend** — Deployed to Hugging Face Spaces as a Docker-based FastAPI service:
+```bash
+git remote add hf https://huggingface.co/spaces/<hf_username>/<space_name>
+git push hf main
+```
+
+Required Space secrets: `LLM_API_KEY`. Optional: `LLM_API_BASE`, `LLM_MODEL`, `LANGCHAIN_API_KEY`.
+
+**Frontend** — Deployed to Vercel. Set `VITE_API_URL=https://<space_name>.hf.space` in Vercel environment variables.
+
+**CI/CD** — GitHub Actions runs Black formatting, Flake8 linting, and pytest on every push. Docker multi-stage builds validate container integrity before deployment.
+
+---
+
+## Why This Project
+
+Standard RAG is a solved problem. Hallucination-controlled RAG at the sentence level, with NLI verification, citation anchoring, and multi-turn memory — in a production-deployed, fully evaluated system — is not.
+
+This project was built to answer a specific question: *how do you make LLM outputs trustworthy enough for a researcher to stake their work on?*
+
+The answer is: you don't rely on the LLM to self-correct. You build the verification layer externally, make it inspectable, and expose the confidence mechanics to the user.
+
+---
+
+**Live Demo → [hallucination-controlled-rag.vercel.app](https://hallucination-controlled-rag.vercel.app/)**
