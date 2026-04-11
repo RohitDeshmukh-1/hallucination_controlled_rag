@@ -44,9 +44,10 @@ const TrashIcon = () => (
 );
 
 export default function Sidebar({
+  user,
   sessions, currentSessionId, sessionName, activeDocs,
   pins, indexStatus, onNewSession, onSelectSession,
-  onUpload, onUnpin, onClearIndex, uploadLoading,
+  onUpload, onUnpin, onClearIndex, onLogout, uploadLoading,
 }) {
   const fileRef = useRef(null);
   const [expandPins, setExpandPins] = useState(true);
@@ -64,7 +65,10 @@ export default function Sidebar({
       {/* Logo */}
       <div className="sidebar-logo">
         <span className="logo-icon"><AtomIcon /></span>
-        <span className="logo-text">ResearchMind</span>
+        <div className="logo-copy">
+          <span className="logo-text">ResearchMind</span>
+          <span className="logo-user">@{user?.username}</span>
+        </div>
       </div>
 
       {/* Upload Button */}
@@ -164,6 +168,9 @@ export default function Sidebar({
       <div className="sidebar-footer">
         <button className="btn btn-ghost btn-full" onClick={onNewSession}>
           <PlusIcon /> New Session
+        </button>
+        <button className="btn btn-ghost btn-full" onClick={onLogout}>
+          Sign Out
         </button>
       </div>
     </aside>

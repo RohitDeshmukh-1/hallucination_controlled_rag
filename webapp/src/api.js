@@ -1,8 +1,18 @@
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const TOKEN_KEY = 'researchmind_token';
+let authToken = window.localStorage.getItem(TOKEN_KEY) || '';
 
 async function request(path, options = {}) {
+  const headers = { ...options.headers };
+  if (!options.skipJsonHeader) {
+    headers['Content-Type'] = 'application/json';
+  }
+  if (authToken) {
+    headers.Authorization = `Bearer ${authToken}`;
+  }
+
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers,
     ...options,
   });
   if (!res.ok) {
@@ -13,6 +23,29 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  setToken: (token) => {
+    authToken = token || '';
+    if (authToken) {
+      window.localStorage.setItem(TOKEN_KEY, authToken);
+    } else {
+      window.localStorage.removeItem(TOKEN_KEY);
+    }
+  },
+  getToken: () => authToken,
+
+  // Auth
+  register: (username, password) =>
+    request('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    }),
+  login: (username, password) =>
+    request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    }),
+  me: () => request('/auth/me'),
+
   // Health
   health: () => request('/health'),
 
@@ -26,6 +59,7 @@ export const api = {
     form.append('file', file);
     return fetch(`${BASE}/upload?session_id=${sessionId}`, {
       method: 'POST',
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
       body: form,
     }).then(r => {
       if (!r.ok) return r.json().then(e => Promise.reject(new Error(e.detail)));

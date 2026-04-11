@@ -36,8 +36,12 @@ python*/
 
 # Storage & Model Cache
 storage/uploads/*.pdf
+storage/uploads/**/*.pdf
 storage/index/*.index
 storage/index/*.pkl
+storage/index/**/*.index
+storage/index/**/*.pkl
+storage/auth/
 
 # HuggingFace / Torch model cache
 .cache/

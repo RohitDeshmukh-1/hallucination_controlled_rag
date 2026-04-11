@@ -15,11 +15,21 @@
   border-bottom: 1px solid var(--border);
 }
 .logo-icon { color: var(--violet); display: flex; }
+.logo-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
 .logo-text {
   font-size: 15px; font-weight: 700;
   background: linear-gradient(135deg, #c0c1ff, #818cf8);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   letter-spacing: -0.3px;
+}
+.logo-user {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
 }
 
 .sidebar-section { padding: 12px 12px 0; }
@@ -110,6 +120,8 @@
 
 /* Footer */
 .sidebar-footer {
+  display: grid;
+  gap: 8px;
   padding: 10px 12px;
   border-top: 1px solid var(--border);
 }

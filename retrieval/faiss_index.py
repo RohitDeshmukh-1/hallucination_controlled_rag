@@ -15,9 +15,14 @@ class FaissIndex:
     Supports document-level tracking and index lifecycle management.
     """
 
-    def __init__(self, dim: int = settings.EMBEDDING_DIM):
-        self.index_path = settings.FAISS_INDEX_PATH
-        self.meta_path = settings.FAISS_META_PATH
+    def __init__(
+        self,
+        dim: int = settings.EMBEDDING_DIM,
+        index_path: Optional[Path] = None,
+        meta_path: Optional[Path] = None,
+    ):
+        self.index_path = index_path or settings.FAISS_INDEX_PATH
+        self.meta_path = meta_path or settings.FAISS_META_PATH
         self.dim = dim
         self.index = faiss.IndexFlatIP(dim)
         self.chunks: List[Dict] = []

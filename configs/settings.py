@@ -44,6 +44,8 @@ class Settings(BaseSettings):
     # Storage Paths
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     STORAGE_DIR: Path = BASE_DIR / "storage"
+    AUTH_DIR: Path = STORAGE_DIR / "auth"
+    USERS_PATH: Path = AUTH_DIR / "users.json"
     UPLOAD_DIR: Path = STORAGE_DIR / "uploads"
     INDEX_DIR: Path = STORAGE_DIR / "index"
     
@@ -51,10 +53,9 @@ class Settings(BaseSettings):
     FAISS_INDEX_PATH: Path = INDEX_DIR / "faiss.index"
     FAISS_META_PATH: Path = INDEX_DIR / "chunks.pkl"
 
-    # Supabase Configuration (Optional for Cloud Storage)
-    SUPABASE_URL: Optional[str] = None
-    SUPABASE_KEY: Optional[str] = None
-    SUPABASE_BUCKET: str = "papers"
+    # Auth Configuration
+    AUTH_SECRET_KEY: str = "change-me-before-production"
+    AUTH_TOKEN_TTL_HOURS: int = 24
 
     # Optimization
     USE_GPU: bool = False
